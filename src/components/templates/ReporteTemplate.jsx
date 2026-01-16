@@ -355,9 +355,10 @@ console.log("RPC crear_antecedente_y_hallazgos:", data, error);
         )}
       </TableWrapper>
 
-      <section className="btn-crear">
-        <button onClick={() => setOpen(true)}>➕ Crear Reporte</button>
-      </section>
+      <FabCrear onClick={() => setOpen(true)}>
+        <span className="icon">＋</span>
+        <span className="label">Crear Reporte</span>
+      </FabCrear>
 
       {open && (
         <Modal>
@@ -481,6 +482,72 @@ const Container = styled.div`
     }
   }
 `;
+
+const FabCrear = styled.button`
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 120;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 14px 22px;
+  border-radius: 999px;
+  border: none;
+
+  background: linear-gradient(135deg, #1c576e 0%, #15e47c 100%);
+  color: #022c22;
+
+  font-family: "Poppins", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  cursor: pointer;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+
+  transition: 
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+
+  .icon {
+    font-size: 1.2rem;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    font-weight: 700;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.05);
+    box-shadow:
+      0 18px 40px rgba(0, 0, 0, 0.22),
+      0 0 0 6px rgba(21, 228, 124, 0.15);
+  }
+
+  &:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow:
+      0 10px 22px rgba(0, 0, 0, 0.2);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 4px rgba(21, 228, 124, 0.35);
+  }
+`;
+
 
 const Modal = styled.div`
   position: fixed;
