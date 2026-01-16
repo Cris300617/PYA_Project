@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Sidebar,FormSection, AntecedentesObra, AntecedentesInspeccion, AntecedentesActividad, AntecedentesColaboradores, AntecedentesEmpresa, AntecedentesHallazgos, AntecedentesResponsableFaena, AntecedentesUbicacion } from "../../index";
+import { Sidebar,FormSection, AntecedentesObra, AntecedentesInspeccion, AntecedentesActividad, AntecedentesColaboradores, AntecedentesEmpresa, AntecedentesHallazgos, AntecedentesResponsableFaena, AntecedentesUbicacion, Btnexcel } from "../../index";
 import { supabase } from "../../supabase/supabase.config";
 import image from "./pya.png";
+import * as XLSX from 'xlsx';
 
 
 const componentMap = {
@@ -108,15 +109,18 @@ export function ReporteTemplate() {
       .from("v_reportes_resumen")
       .select("*")
       .order("reporte_id", { ascending: false });
+      
+      if (!error) setReportes(data);
+      setLoading(false);
+    }
 
-      console.log(data);
-      console.log(reportes);
-
-
-
-    if (!error) setReportes(data);
-    setLoading(false);
-  }
+    const exportarExcel = () => {
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(reportes);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos de Tabla');
+        XLSX.writeFile(workbook, 'datos_tabla.xlsx'); 
+        console.log("hola")
+      };
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -236,10 +240,9 @@ export function ReporteTemplate() {
         if (ubicacionError) throw ubicacionError;
       }
 
-      // ================= HALLAZGOS =================
     if (template.antecedentes_hallazgos && actividadData.ids_con_hallazgo === "Si") {
 
-      // 1️⃣ crear antecedente de hallazgos
+      
       const { data: antecedenteHallazgos, error: antecedenteError } =
         await supabase
           .from("antecedentes_hallazgos")
@@ -253,7 +256,7 @@ export function ReporteTemplate() {
 
       if (antecedenteError) throw antecedenteError;
 
-      // 2️⃣ insertar hallazgos (si existen)
+      
       const descripciones = hallazgos
         .map(h => h.descripcion)
         .filter(d => d && d.trim() !== "");
@@ -266,8 +269,6 @@ export function ReporteTemplate() {
     p_descripciones: descripciones,
   }
 );
-
-console.log("RPC crear_antecedente_y_hallazgos:", data, error);
       }
     }
 
@@ -316,44 +317,58 @@ console.log("RPC crear_antecedente_y_hallazgos:", data, error);
     <Container>
       <Sidebar />
 
-      <header className="header-home">
-        D-<span>Project</span>
-      </header>
-      {/* ================= TABLA RESUMEN ================= */}
-      <TableWrapper>
-        {loading ? (
-          <p>Cargando reportes...</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Tipo Obra</th>
-                <th>Código</th>
-                <th>Fecha</th>
-                <th>Empresa</th>
-                <th>Región</th>
-                <th>Actividad</th>
-                <th>Responsable</th>
-              </tr>
-            </thead>
-            <tbody>
-              {reportes.map((r) => (
-                <tr key={r.reporte_id}>
-                  <td>{r.reporte_id}</td>
-                  <td>{r.tipo_obra}</td>
-                  <td>{r.codigo_obra}</td>
-                  <td>{r.fecha_ids}</td>
-                  <td>{r.nombre_empresa}</td>
-                  <td>{r.region}</td>
-                  <td>{r.tipo_actividad}</td>
-                  <td>{r.nombre_responsable}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </TableWrapper>
+
+      <TableSection>
+  <TableHeader>
+  <TitleGroup>
+    <h2>Reportes</h2>
+    <span>Listado general de inspecciones</span>
+  </TitleGroup>
+
+  <Btnexcel />
+</TableHeader>
+
+
+  <TableWrapper>
+    {loading ? (
+      <p>Cargando reportes...</p>
+    ) : (
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tipo Obra</th>
+            <th>Código Obra</th>
+            <th>Fecha IDS</th>
+            <th>Empresa</th>
+            <th>Región</th>
+            <th>Actividad</th>
+            <th>Responsable</th>
+            <th>Latitud</th>
+          </tr>
+        </thead>
+        <tbody>
+          {reportes.map((r) => (
+            <tr key={r.reporte_id}>
+              <td>{r.reporte_id}</td>
+              <td>{r.tipo_obra}</td>
+              <td>{r.codigo_obra}</td>
+              <td>{r.fecha_ids}</td>
+              <td>{r.nombre_empresa}</td>
+              <td>{r.region}</td>
+              <td>{r.tipo_actividad}</td>
+              <td>{r.nombre_responsable}</td>
+              <td>{r.geo_latitud}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+  </TableWrapper>
+</TableSection>
+
+
+      
 
       <FabCrear onClick={() => setOpen(true)}>
         <span className="icon">＋</span>
@@ -481,6 +496,11 @@ const Container = styled.div`
       }
     }
   }
+
+  .btnexcel{
+    display: flex;
+
+  }
 `;
 
 const FabCrear = styled.button`
@@ -547,6 +567,52 @@ const FabCrear = styled.button`
       0 0 0 4px rgba(21, 228, 124, 0.35);
   }
 `;
+
+const TableSection = styled.section`
+  padding: 30px;
+`;
+
+const TableHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-right: 30px;
+`;
+
+const TitleGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.02em;
+    position: relative;
+    padding-left: 14px;
+  }
+
+  h2::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 70%;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #15e47c, #1c576e);
+  }
+
+  span {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
+  }
+`;
+
+
 
 
 const Modal = styled.div`

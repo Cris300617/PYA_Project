@@ -1,7 +1,7 @@
 export {default as App} from './App';
 export * from './components/templates/HomeTemplate';
 export * from './main';
-export * from './styles/Globalstyles';
+export * from './styles/GlobalStyles';
 export * from './styles/breakpoints';
 export * from './routers/routes';
 export * from './components/organismos/Sidebar/sidebar';
@@ -40,3 +40,4 @@ export * from './components/organismos/contentForms/AntecedentesHallazgos';
 export * from './components/organismos/contentForms/AntecedentesInspeccion';
 export * from './components/organismos/contentForms/AntecedentesResponsableFaena';
 export * from './components/organismos/contentForms/AntecedentesUbicacion';
+export * from './components/moleculas/Btnexcel';

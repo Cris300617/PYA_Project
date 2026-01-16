@@ -7,7 +7,6 @@ export function AntecedentesResponsableFaena({ data, setData }) {
     <Container>
       <section className="box">
 
-        {/* Primera fila */}
         <div className="field">
           <label>RUT Responsable</label>
           <input
@@ -32,7 +31,6 @@ export function AntecedentesResponsableFaena({ data, setData }) {
           />
         </div>
 
-        {/* Segunda fila */}
         <div className="field">
           <label>Persona Acreditada</label>
           <input
@@ -57,40 +55,28 @@ export function AntecedentesResponsableFaena({ data, setData }) {
           />
         </div>
 
-        {/* Tercera fila */}
         <div className="field">
-          <label>Empresa Acreditadora</label>
-          <select
-            value={data.empresa_acreditadora}
+          <label>Cargo Acreditado</label>
+          <input
+            type="text"
+            placeholder="Cargo Acreditado"
+            value={data.cargo_acreditado || ""}
             onChange={(e) =>
-              setData({ ...data, empresa_acreditadora: e.target.value })
+              setData({ ...data, cargo_acreditado: e.target.value })
             }
-          >
-            <option value="">Seleccionar opción</option>
-            <option value="Si">Si</option>
-            <option value="No">No</option>
-          </select>
+          />
         </div>
 
         <div className="field">
           <label>Fuerza de Trabajo</label>
-          <select
-            value={data.fuerza_de_trabajo ?? ""}
+          <input
+            type="text"
+            placeholder="Cargo Acreditado"
+            value={data.cargo_acreditado || ""}
             onChange={(e) =>
-              setData({
-                ...data,
-                fuerza_de_trabajo:
-                  e.target.value === "" ? null : parseInt(e.target.value, 10),
-              })
+              setData({ ...data, cargo_acreditado: e.target.value })
             }
-          >
-            <option value="">Seleccionar opción</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-          </select>
+          />
         </div>
 
       </section>
