@@ -1,21 +1,32 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Sidebar, AntecedentesObra, AntecedentesInspeccion, AntecedentesActividad, AntecedentesColaboradores, AntecedentesEmpresa, AntecedentesHallazgos, AntecedentesResponsableFaena, AntecedentesUbicacion } from "../../index";
+import { Sidebar,FormSection, AntecedentesObra, AntecedentesInspeccion, AntecedentesActividad, AntecedentesColaboradores, AntecedentesEmpresa, AntecedentesHallazgos, AntecedentesResponsableFaena, AntecedentesUbicacion } from "../../index";
 import { supabase } from "../../supabase/supabase.config";
+import image from "./pya.png";
+
 
 const componentMap = {
   antecedentes_obra: AntecedentesObra,
   antecedentes_inspeccion: AntecedentesInspeccion,
-  antecedentes_actividad: AntecedentesActividad,
-  antecedentes_colaboradores: AntecedentesColaboradores,
+  
   antecedentes_empresa: AntecedentesEmpresa,
-  antecedentes_hallazgos: AntecedentesHallazgos,
+  
   antecedentes_responsable_faena: AntecedentesResponsableFaena,
+  antecedentes_actividad: AntecedentesActividad,
   antecedentes_ubicacion: AntecedentesUbicacion,
+  antecedentes_colaboradores: AntecedentesColaboradores,
+  antecedentes_hallazgos: AntecedentesHallazgos,
+  
 };
 
 export function ReporteTemplate() {
   const [template, setTemplate] = useState(null);
+  const [reportes, setReportes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [hallazgos, setHallazgos] = useState([
+  { descripcion: "" }
+]);
+
   const [obraData, setObraData] = useState({
     tipo_obra: "",
     codigo_obra: "",
@@ -62,6 +73,7 @@ export function ReporteTemplate() {
     geo_altitud: "",
   });
   
+  
 
   {/**const [_Data, set_Data] = useState({
     __: "",
@@ -72,6 +84,7 @@ export function ReporteTemplate() {
 
   useEffect(() => {
     obtenerTemplate();
+    obtenerReportes();
   }, []);
 
   async function obtenerTemplate() {
@@ -88,6 +101,23 @@ export function ReporteTemplate() {
     }
   }
 
+  async function obtenerReportes() {
+    setLoading(true);
+
+    const { data, error } = await supabase
+      .from("v_reportes_resumen")
+      .select("*")
+      .order("reporte_id", { ascending: false });
+
+      console.log(data);
+      console.log(reportes);
+
+
+
+    if (!error) setReportes(data);
+    setLoading(false);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     if (!template) return;
@@ -102,6 +132,7 @@ export function ReporteTemplate() {
         ])
         .select()
         .single();
+
 
       if (reporteError) throw reporteError;
 
@@ -205,6 +236,41 @@ export function ReporteTemplate() {
         if (ubicacionError) throw ubicacionError;
       }
 
+      // ================= HALLAZGOS =================
+    if (template.antecedentes_hallazgos && actividadData.ids_con_hallazgo === "Si") {
+
+      // 1️⃣ crear antecedente de hallazgos
+      const { data: antecedenteHallazgos, error: antecedenteError } =
+        await supabase
+          .from("antecedentes_hallazgos")
+          .insert([
+            {
+              reporte_id: reporte.id,
+            },
+          ])
+          .select()
+          .single();
+
+      if (antecedenteError) throw antecedenteError;
+
+      // 2️⃣ insertar hallazgos (si existen)
+      const descripciones = hallazgos
+        .map(h => h.descripcion)
+        .filter(d => d && d.trim() !== "");
+
+      if (descripciones.length > 0) {
+        const { data, error } = await supabase.rpc(
+  "crear_antecedente_y_hallazgos",
+  {
+    p_reporte_id: reporte.id,
+    p_descripciones: descripciones,
+  }
+);
+
+console.log("RPC crear_antecedente_y_hallazgos:", data, error);
+      }
+    }
+
 
 
       setOpen(false);
@@ -231,8 +297,14 @@ export function ReporteTemplate() {
     geo_latitud: "",
     geo_longitud: "",
     geo_altitud: "",});
+
+    setHallazgos([{ descripcion: "" }]);
+
       
       {/**AQUIIIIIII PONEEER INFOOOOOOO */}
+
+      
+
     } catch (err) {
       console.error("Error al guardar reporte:", err);
     }
@@ -247,6 +319,41 @@ export function ReporteTemplate() {
       <header className="header-home">
         D-<span>Project</span>
       </header>
+      {/* ================= TABLA RESUMEN ================= */}
+      <TableWrapper>
+        {loading ? (
+          <p>Cargando reportes...</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tipo Obra</th>
+                <th>Código</th>
+                <th>Fecha</th>
+                <th>Empresa</th>
+                <th>Región</th>
+                <th>Actividad</th>
+                <th>Responsable</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reportes.map((r) => (
+                <tr key={r.reporte_id}>
+                  <td>{r.reporte_id}</td>
+                  <td>{r.tipo_obra}</td>
+                  <td>{r.codigo_obra}</td>
+                  <td>{r.fecha_ids}</td>
+                  <td>{r.nombre_empresa}</td>
+                  <td>{r.region}</td>
+                  <td>{r.tipo_actividad}</td>
+                  <td>{r.nombre_responsable}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </TableWrapper>
 
       <section className="btn-crear">
         <button onClick={() => setOpen(true)}>➕ Crear Reporte</button>
@@ -255,71 +362,61 @@ export function ReporteTemplate() {
       {open && (
         <Modal>
           <div className="modal">
+            
+              <img src={image} alt="logo" />
+            
+
             <h3>Formulario de Reporte</h3>
+            
 
             {/* Render dinámico según template */}
-            {Object.keys(componentMap).map((key) => {
+            {Object.keys(componentMap).map((key, index) => {
               if (!template[key]) return null;
 
               const Component = componentMap[key];
 
-              switch (key) {
-                case "antecedentes_obra":
-                  return (
-                    <Component
-                      key={key}
-                      data={obraData}
-                      setData={setObraData}
-                    />
-                  );
+              const titles = {
+                antecedentes_obra: "Antecedentes de la Obra",
+                antecedentes_inspeccion: "Antecedentes de Inspección",
+                antecedentes_empresa: "Antecedentes de la Empresa",
+                antecedentes_responsable_faena: "Antecedentes del Responsable de Faena y/o Actividad",
+                antecedentes_actividad: "Antecedentes de Actividad",
+                antecedentes_ubicacion: "Antecedentes de Ubicación",
+              };
 
-                case "antecedentes_inspeccion":
-                  return (
-                    <Component
-                      key={key}
-                      data={inspeccionData}
-                      setData={setInspeccionData}
-                    />
-                  );
-
-                  case "antecedentes_empresa":
-                  return (
-                    <Component
-                      key={key}
-                      data={empresaData}
-                      setData={setEmpresaData}
-                    />
-                  );
-                  case "antecedentes_actividad":
-                  return (
-                    <Component
-                      key={key}
-                      data={actividadData}
-                      setData={setActividadData}
-                    />
-                  );
-                  case "antecedentes_responsable_faena":
-                  return (
-                    <Component
-                      key={key}
-                      data={faenaData}
-                      setData={setFaenaData}
-                    />
-                  );
-                  case "antecedentes_ubicacion":
-                  return (
-                    <Component
-                      key={key}
-                      data={ubicacionData}
-                      setData={setUbicacionData}
-                    />
-                  );
-
-                // más casos después
-                default:
-                  return null;
-              }
+              return (
+                <FormSection
+                  key={key}
+                  title={titles[key]}
+                  index={index}
+                >
+                  <Component
+                    {...(key === "antecedentes_hallazgos"
+                      ? {
+                          hallazgos,
+                          setHallazgos,
+                        }
+                      : {
+                          data:
+                            key === "antecedentes_obra" ? obraData :
+                            key === "antecedentes_inspeccion" ? inspeccionData :
+                            key === "antecedentes_empresa" ? empresaData :
+                            key === "antecedentes_responsable_faena" ? faenaData :
+                            key === "antecedentes_actividad" ? actividadData :
+                            ubicacionData,
+                          setData:
+                            key === "antecedentes_obra" ? setObraData :
+                            key === "antecedentes_inspeccion" ? setInspeccionData :
+                            key === "antecedentes_empresa" ? setEmpresaData :
+                            key === "antecedentes_responsable_faena" ? setFaenaData :
+                            key === "antecedentes_actividad" ? setActividadData :
+                            setUbicacionData,
+                        })}
+                  />
+                </FormSection>
+              );
             })}
+
 
 
             <div className="actions">
@@ -395,47 +492,147 @@ const Modal = styled.div`
   z-index: 200;
 
   .modal {
+    width: 90%;
+    max-width: 900px;   
+    max-height: 90vh;
+    overflow-y: auto;
+
     background: white;
-    padding: 30px;
-    border-radius: 16px;
-    width: 400px;
+    padding: 32px 36px;
+    border-radius: 18px;
+
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 24px;
+
+    img {
+  align-self: flex-start; 
+  max-width: 240px;       
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  opacity: 0.95;
+}
+
+
+
 
     h3 {
       text-align: center;
-      margin-bottom: 10px;
-      color: black;
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #0f172a;
     }
 
+
     input {
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 0.95rem;
+      width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.9rem;
+  background: white;
     }
 
     .actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
 
-      button {
-        padding: 10px 18px;
-        border-radius: 20px;
-        border: none;
-        cursor: pointer;
-      }
+  button {
+    padding: 12px 22px;
+    border-radius: 999px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
 
-      .cancel {
-        background: #eee;
-      }
+  .cancel {
+    background: #e5e7eb;
+    color: #334155;
+  }
 
-      .create {
-        background: #4ac8a5;
-        color: white;
-      }
+  .create {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    color: #064e3b;
+  }
+}}
+
+`;
+
+const TableWrapper = styled.div`
+  padding: 30px;
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    font-size: 0.9rem;
+  }
+
+  thead {
+    background: linear-gradient(90deg, #1c576e, #15e47c);
+  }
+
+  th {
+    color: white;
+    text-align: left;
+    padding: 14px 16px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #f8fafc;
+  }
+
+  tbody tr:hover {
+    background: #eef6f4;
+    transform: scale(1.002);
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    color: #1f2933;
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Columna id */
+  td:first-child {
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: #475569;
+    max-width: 160px;
+  }
+
+  /* ultima fila sin borde */
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    table {
+      font-size: 0.85rem;
+    }
+
+    th, td {
+      padding: 12px;
     }
   }
 `;

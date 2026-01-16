@@ -1,9 +1,11 @@
 import styled from "styled-components";
+import { FormSection } from "../../../index";
 
 export function AntecedentesColaboradores({ data, setData }) {
   return (
     <Container>
-      <section className="box">
+      <FormSection>
+        <section className="box">
         <select
           value={data.tipo_obra}
           onChange={(e) =>
@@ -32,6 +34,9 @@ export function AntecedentesColaboradores({ data, setData }) {
           />
         )}
       </section>
+
+      </FormSection>
+      
     </Container>
   );
 }

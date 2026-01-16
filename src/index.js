@@ -30,7 +30,7 @@ export * from './components/moleculas/TablaInforme';
 export * from './components/templates/DatosTemplate';
 export * from './pages/Dates';
 export * from './components/organismos/contentForms/AntecedentesObra';
-export * from './components/organismos/formularios/FormularioDinamico';
+export * from './components/organismos/formularios/FormSection';
 export * from './components/templates/ReporteTemplate';
 export * from './pages/Reporte';
 export * from './components/organismos/contentForms/AntecedentesActividad';

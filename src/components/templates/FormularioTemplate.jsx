@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Sidebar, Search, Registro, TablaInforme, AntecedentesObra, FormularioDinamico} from "../../index";
+import { Sidebar, Search, Registro, TablaInforme, AntecedentesObra} from "../../index";
 import image from "./pya.png";
 import { supabase } from "../../supabase/supabase.config";
 import { Icon } from "@iconify/react";
