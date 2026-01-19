@@ -56,9 +56,6 @@ const Container = styled.div`
             height: 100%;
             width: 100%;
             margin: 18px;
-            @media ${Device.tablet}{
-                width: 400px;
-            }
         }
         .span{
             color: #00ffc3;
@@ -71,6 +68,20 @@ const Container = styled.div`
   width: 400px;
   max-width: 100%;
 }
+
+@media ${Device.mobile} {
+    .card {
+      max-width: 320px;
+    }
+  }
+
+
+
+  @media ${Device.tablet} {
+    .card {
+      max-width: 420px;
+    }
+  }
 
 
 `
