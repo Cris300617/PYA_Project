@@ -109,7 +109,9 @@ export function Btnexcel() {
         disabled={!datasets[vistaSeleccionada]?.length || loading}
       >
         <FaFileExcel size={18} />
-        {loading ? "Cargando..." : "Exportar Excel"}
+          <span className="text">
+            {loading ? "Cargando..." : "Exportar Excel"}
+          </span>
       </ExcelButton>
     </Toolbar>
   );
@@ -227,7 +229,6 @@ const ExcelButton = styled.button`
   display: flex;
   align-items: center;
   gap: 10px;
-  
 
   background: linear-gradient(135deg, #1d6f42, #107c41);
   color: #ffffff;
@@ -263,15 +264,19 @@ const ExcelButton = styled.button`
     color: #e6f4ea;
   }
 
-    @media (max-width: 640px) {
-    bottom: 16px;
-    right: 16px;
-    padding: 12px 16px;
-    font-size: 0.85rem;
+  /* 📱 MOBILE: solo icono */
+  @media (max-width: 640px) {
+    padding: 12px;
+    border-radius: 50%;
+    gap: 0;
 
-    .label {
-      display: none; 
+    .text {
+      display: none;
+    }
+
+    svg {
+      font-size: 20px;
     }
   }
-
 `;
+
