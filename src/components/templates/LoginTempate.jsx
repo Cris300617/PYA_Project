@@ -71,7 +71,7 @@ const Container = styled.div`
 
 @media ${Device.mobile} {
     .card {
-      max-width: 320px;
+      max-width: 240px;
     }
   }
 
