@@ -34,14 +34,24 @@ export function Btnexcel() {
   async function cargarDatasets() {
     setLoading(true);
 
-    const [resumen, obra] = await Promise.all([
-      supabase.from("v_reportes_resumen").select("*"),
+    const [resumen, obra, empresa, actividad, ubicacion, inspeccion, faena] = await Promise.all([
+      supabase.from("v_registro_completo").select("*"),
       supabase.from("v_antecedentes_obra").select("*"),
+      supabase.from("v_antecedentes_empresa").select("*"),
+      supabase.from("v_antecedentes_actividad").select("*"),
+      supabase.from("v_antecedentes_ubicacion").select("*"),
+      supabase.from("v_antecedentes_inspeccion").select("*"),
+      supabase.from("v_antecedentes_faena").select("*"),
     ]);
 
     setDatasets({
       resumen: resumen.data || [],
       obra: obra.data || [],
+      empresa: empresa.data || [],
+      actividad: actividad.data || [],
+      ubicacion: ubicacion.data || [],
+      inspeccion: inspeccion.data || [],
+      faena: faena.data || [],
     });
 
     setLoading(false);
@@ -61,11 +71,31 @@ export function Btnexcel() {
   const opciones = {
     resumen: {
       label: "Reportes Resumen",
-      icon: <FaChartBar size={14} />,
+      icon: <FaChartBar size={12} />,
     },
     obra: {
       label: "Antecedentes de Obra",
-      icon: <FaHardHat size={14} />,
+      icon: <FaHardHat size={12} />,
+    },
+    empresa: {
+      label: "Antecedentes de Empresa",
+      icon: <FaHardHat size={12} />,
+    },
+    actividad: {
+      label: "Antecedentes de Actividad",
+      icon: <FaHardHat size={12} />,
+    },
+    ubicacion: {
+      label: "Antecedentes de Ubicacion",
+      icon: <FaHardHat size={12} />,
+    },
+    inspeccion: {
+      label: "Antecedentes de Inspeccion",
+      icon: <FaHardHat size={12} />,
+    },
+    faena: {
+      label: "Antecedentes de R.Faena",
+      icon: <FaHardHat size={12} />,
     },
   };
 
@@ -206,7 +236,7 @@ const DropdownItem = styled.button`
   color: ${({ active }) =>
     active ? "#166534" : "#334155"};
 
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 
   border: none;

@@ -10,7 +10,7 @@ export function BtnPdfReporte({ reporteId }) {
     if (!reporteId) return;
 
     const { data, error } = await supabase
-      .from("v_reporte_completo") 
+      .from("v_registro_completo") 
       .select("*")
       .eq("reporte_id", reporteId)
       .single();
@@ -26,7 +26,7 @@ export function BtnPdfReporte({ reporteId }) {
     pdf.text("Reporte de Inspección", 14, 18);
 
     pdf.setFontSize(11);
-    pdf.text(`ID Reporte: ${data.reporte_id}`, 14, 28);
+    pdf.text(`Numero de Registro: ${data.record_number}`, 14, 28);
 
     autoTable(pdf, {
       startY: 36,
@@ -47,11 +47,12 @@ export function BtnPdfReporte({ reporteId }) {
     if (data.hallazgos?.length) {
       autoTable(pdf, {
         startY: pdf.lastAutoTable.finalY + 8,
-        head: [["Descripción", "Estado", "Clasificación"]],
+        head: [["Descripción", "Estado", "Clasificación", "ID de Hallazgo"]],
         body: data.hallazgos.map(h => [
           h.descripcion,
           h.estado,
           h.clasificacion,
+          h.correlativo,
         ]),
         styles: { fontSize: 8 },
       });

@@ -45,10 +45,8 @@ export function ReporteTemplate() {
   const [loading, setLoading] = useState(true);
   const [hallazgos, setHallazgos] = useState([crearHallazgo()]);
 
-    // 🔍 búsqueda
   const [search, setSearch] = useState("");
 
-  // 🎯 filtros
   const [filters, setFilters] = useState({
     empresa: "",
     region: "",

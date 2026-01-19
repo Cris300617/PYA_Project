@@ -56,13 +56,13 @@ export function AntecedentesResponsableFaena({ data, setData }) {
         </div>
 
         <div className="field">
-          <label>Cargo Acreditado</label>
+          <label>Empresa Acreditado</label>
           <input
             type="text"
-            placeholder="Cargo Acreditado"
-            value={data.cargo_acreditado || ""}
+            placeholder="Empresa Acreditado"
+            value={data.empresa_acreditadora || ""}
             onChange={(e) =>
-              setData({ ...data, cargo_acreditado: e.target.value })
+              setData({ ...data, empresa_acreditadora: e.target.value })
             }
           />
         </div>
@@ -71,10 +71,10 @@ export function AntecedentesResponsableFaena({ data, setData }) {
           <label>Fuerza de Trabajo</label>
           <input
             type="text"
-            placeholder="Cargo Acreditado"
-            value={data.cargo_acreditado || ""}
+            placeholder="Fuerza de Trabajo"
+            value={data.fuerza_de_trabajo || ""}
             onChange={(e) =>
-              setData({ ...data, cargo_acreditado: e.target.value })
+              setData({ ...data, fuerza_de_trabajo: e.target.value })
             }
           />
         </div>
