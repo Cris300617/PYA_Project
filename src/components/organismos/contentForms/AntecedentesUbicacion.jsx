@@ -5,7 +5,6 @@ export function AntecedentesUbicacion({ data, setData }) {
     <Container>
       <section className="box">
 
-        {/* Fila 1 */}
         <div className="field">
           <label>Región</label>
           <input
@@ -30,7 +29,6 @@ export function AntecedentesUbicacion({ data, setData }) {
           />
         </div>
 
-        {/* Fila 2 */}
         <div className="field">
           <label>Delegación</label>
           <input
@@ -55,7 +53,6 @@ export function AntecedentesUbicacion({ data, setData }) {
           />
         </div>
 
-        {/* Fila 3 */}
         <div className="field">
           <label>Latitud</label>
           <input
@@ -90,7 +87,6 @@ export function AntecedentesUbicacion({ data, setData }) {
           />
         </div>
 
-        {/* Fila 4 */}
         <div className="field">
           <label>Altitud</label>
           <input
@@ -118,7 +114,7 @@ const Container = styled.div`
 
   .box {
     display: grid;
-    grid-template-columns: repeat(2, minmax(240px, 1fr)); /* 2 columnas, mínimo 240px */
+    grid-template-columns: repeat(2, minmax(240px, 1fr)); 
     column-gap: 20px;
     row-gap: 16px;
   }
@@ -126,11 +122,11 @@ const Container = styled.div`
   .field {
     display: flex;
     flex-direction: column;
-    gap: 6px; /* espacio entre label y input */
+    gap: 6px; 
   }
 
   input {
-    width: 100%; /* ocupa toda la columna */
+    width: 100%; 
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #cbd5e1;
@@ -149,5 +145,23 @@ const Container = styled.div`
     font-weight: 600;
     color: #475569;
     margin-bottom: 5px;
+  }
+
+  @media (max-width: 1024px) {
+    .box {
+      grid-template-columns: 1fr;
+    }
+  }
+
+
+  @media (max-width: 640px) {
+    .box {
+      gap: 14px;
+    }
+
+    input {
+      font-size: 0.85rem;
+      padding: 11px 12px;
+    }
   }
 `;

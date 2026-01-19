@@ -167,6 +167,8 @@ const DropdownButton = styled.button`
   &:hover {
     border-color: #cbd5e1;
   }
+
+  
 `;
 
 /* Menú desplegable */
@@ -190,6 +192,7 @@ const DropdownMenu = styled.div`
 const DropdownItem = styled.button`
   width: 100%;
   padding: 12px 14px;
+  
 
   display: flex;
   align-items: center;
@@ -224,6 +227,7 @@ const ExcelButton = styled.button`
   display: flex;
   align-items: center;
   gap: 10px;
+  
 
   background: linear-gradient(135deg, #1d6f42, #107c41);
   color: #ffffff;
@@ -258,4 +262,16 @@ const ExcelButton = styled.button`
   svg {
     color: #e6f4ea;
   }
+
+    @media (max-width: 640px) {
+    bottom: 16px;
+    right: 16px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+
+    .label {
+      display: none; 
+    }
+  }
+
 `;

@@ -134,15 +134,15 @@ const Container = styled.div`
     box-shadow: 0 0 0 2px rgba(21, 228, 124, 0.2);
   }
 
-  /* 📱 Mobile */
   @media (max-width: 640px) {
     .field.full {
       grid-column: span 1;
+      max-width: 80%;
     }
 
     .field.sm input,
     .field.md input {
-      max-width: 100%;
+      max-width: 80%;
     }
   }
 `;

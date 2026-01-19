@@ -86,6 +86,7 @@ export function AntecedentesResponsableFaena({ data, setData }) {
 
 const Container = styled.div`
   width: 100%; 
+  
 
   .box {
   display: grid;
@@ -131,6 +132,24 @@ const Container = styled.div`
     font-weight: 600;
     color: #475569;
     margin-bottom: 5px;
+  }
+
+    @media (max-width: 1024px) {
+    .box {
+      grid-template-columns: 1fr;
+    }
+  }
+
+
+  @media (max-width: 640px) {
+    .box {
+      gap: 14px;
+    }
+
+    input {
+      font-size: 0.85rem;
+      padding: 11px 12px;
+    }
   }
 `;
 

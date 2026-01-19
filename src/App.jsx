@@ -25,7 +25,6 @@ function App() {
             {/*<Sidebar />*/}
 
             <Container>
-              <section className="contentMenu">menu</section>
               <section className="contentRouters">
                 <MyRoutes />
               </section>

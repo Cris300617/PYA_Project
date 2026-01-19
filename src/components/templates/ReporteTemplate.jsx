@@ -15,18 +15,36 @@ const componentMap = {
   antecedentes_responsable_faena: AntecedentesResponsableFaena,
   antecedentes_actividad: AntecedentesActividad,
   antecedentes_ubicacion: AntecedentesUbicacion,
-  antecedentes_colaboradores: AntecedentesColaboradores,
   antecedentes_hallazgos: AntecedentesHallazgos,
+  antecedentes_colaboradores: AntecedentesColaboradores,
+  
   
 };
+
+const crearHallazgo = () => ({
+  id: crypto.randomUUID(),
+  descripcion: "",
+  estado: "Pendiente",
+  paralizacion: "",
+  potencializacion: "",
+  tipo_hallazgo: "",
+  evidencia: "",
+  clasificacion: "",
+  control_asociado: "",
+  fecha_cierre: "",
+  medida_correctiva: "",
+  tipo_evidencia_cierre: "",
+  e_documental_cierre_hallazgo: "",
+  e_fotografica_cierre_hallazgo: "",
+});
+
 
 export function ReporteTemplate() {
   const [template, setTemplate] = useState(null);
   const [reportes, setReportes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [hallazgos, setHallazgos] = useState([
-  { descripcion: "" }
-]);
+  const [hallazgos, setHallazgos] = useState([crearHallazgo()]);
+
 
   const [obraData, setObraData] = useState({
     tipo_obra: "",
@@ -257,19 +275,25 @@ export function ReporteTemplate() {
       if (antecedenteError) throw antecedenteError;
 
       
-      const descripciones = hallazgos
-        .map(h => h.descripcion)
-        .filter(d => d && d.trim() !== "");
+      const hallazgosValidos = hallazgos.filter(
+        h => h.descripcion && h.descripcion.trim() !== ""
+      );
 
-      if (descripciones.length > 0) {
-        const { data, error } = await supabase.rpc(
-  "crear_antecedente_y_hallazgos",
-  {
-    p_reporte_id: reporte.id,
-    p_descripciones: descripciones,
-  }
-);
+      if (hallazgosValidos.length > 0) {
+        const { error } = await supabase.rpc(
+          "crear_info_hallazgos",
+          {
+            p_reporte_id: reporte.id,
+            p_hallazgos: hallazgosValidos
+          }
+        );
+
+        if (error) {
+          console.error("Error insertando hallazgos:", error);
+          throw error;
+        }
       }
+
     }
 
 
@@ -299,7 +323,17 @@ export function ReporteTemplate() {
     geo_longitud: "",
     geo_altitud: "",});
 
-    setHallazgos([{ descripcion: "" }]);
+    setHallazgos([{ descripcion: "", estado:"", paralizacion:"",
+    potencializacion:"",
+    tipo_hallazgo:"",
+    evidencia:"",
+    clasificacion:"",
+    control_asociado:"",
+    fecha_cierre:"",
+    medida_correctiva:"",
+    tipo_evidencia_cierre:"",
+    e_documental_cierre_hallazgo:"",
+    e_fotografica_cierre_hallazgo:"", }]);
 
       
       {/**AQUIIIIIII PONEEER INFOOOOOOO */}
@@ -385,7 +419,7 @@ export function ReporteTemplate() {
             <h3>Formulario de Reporte</h3>
             
 
-            {/* Render dinámico según template */}
+            {/* Render dinámico según template*/}
             {Object.keys(componentMap).map((key, index) => {
               if (!template[key]) return null;
 
@@ -398,6 +432,7 @@ export function ReporteTemplate() {
                 antecedentes_responsable_faena: "Antecedentes del Responsable de Faena y/o Actividad",
                 antecedentes_actividad: "Antecedentes de Actividad",
                 antecedentes_ubicacion: "Antecedentes de Ubicación",
+                antecedentes_hallazgos: "Antecedentes de Hallazgos",
               };
 
               return (
@@ -456,6 +491,10 @@ const Container = styled.div`
   background: #ffffff;
   padding-left: 72px;
   font-family: "Poppins", sans-serif;
+
+  @media (max-width: 1024px) {
+    padding-left: 0; /* 👈 sidebar colapsado */
+  }
 
   .header-home {
     position: relative;
@@ -566,18 +605,40 @@ const FabCrear = styled.button`
     box-shadow:
       0 0 0 4px rgba(21, 228, 124, 0.35);
   }
+
+  @media (max-width: 640px) {
+    bottom: 16px;
+    right: 16px;
+    padding: 12px 16px;
+    font-size: 0.85rem;
+
+    .label {
+      display: none;
+    }
+  }
 `;
 
 const TableSection = styled.section`
   padding: 30px;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `;
 
 const TableHeader = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-right: 30px;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
+
 
 const TitleGroup = styled.div`
   display: flex;
@@ -625,8 +686,8 @@ const Modal = styled.div`
   z-index: 200;
 
   .modal {
-    width: 90%;
-    max-width: 900px;   
+    width: 100%;
+    max-width: 1024px;  
     max-height: 90vh;
     overflow-y: auto;
 
@@ -637,6 +698,10 @@ const Modal = styled.div`
     display: flex;
     flex-direction: column;
     gap: 24px;
+
+    @media (max-width: 1024px) {
+    max-width: 100%;
+  }
 
     img {
   align-self: flex-start; 
@@ -655,6 +720,10 @@ const Modal = styled.div`
       font-size: 1.5rem;
       font-weight: 600;
       color: #0f172a;
+
+      @media (max-width: 480px) {
+        font-size: 1.15rem;
+      }
     }
 
 
@@ -667,11 +736,12 @@ const Modal = styled.div`
   background: white;
     }
 
-    .actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 20px;
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+  
 
   button {
     padding: 12px 22px;
@@ -679,6 +749,10 @@ const Modal = styled.div`
     border: none;
     font-weight: 600;
     cursor: pointer;
+
+    @media (max-width: 480px) {
+          width: 100%;
+        }
   }
 
   .cancel {
@@ -690,13 +764,27 @@ const Modal = styled.div`
     background: linear-gradient(90deg, #22c55e, #4ade80);
     color: #064e3b;
   }
+
+  @media (max-width: 480px) {
+        flex-direction: column;
+      }
 }}
+
+@media (max-width: 768px) {
+      padding: 20px;
+      border-radius: 14px;
+    }
+
+    @media (max-width: 480px) {
+      padding: 16px;
+    }
 
 `;
 
 const TableWrapper = styled.div`
   padding: 30px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 
   table {
     width: 100%;
@@ -707,6 +795,7 @@ const TableWrapper = styled.div`
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
     font-size: 0.9rem;
+    min-width: 900px; 
   }
 
   thead {
@@ -759,13 +848,11 @@ const TableWrapper = styled.div`
   }
 
   /* Responsive */
-  @media (max-width: 900px) {
+  @media (max-width: 768px) {
+    padding: 12px;
+
     table {
       font-size: 0.85rem;
-    }
-
-    th, td {
-      padding: 12px;
     }
   }
 `;
