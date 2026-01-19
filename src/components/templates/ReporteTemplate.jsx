@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Sidebar,FormSection, AntecedentesObra, AntecedentesInspeccion, AntecedentesActividad, AntecedentesColaboradores, AntecedentesEmpresa, AntecedentesHallazgos, AntecedentesResponsableFaena, AntecedentesUbicacion, Btnexcel } from "../../index";
+import { Sidebar,FormSection, AntecedentesObra, AntecedentesInspeccion, AntecedentesActividad, AntecedentesColaboradores, AntecedentesEmpresa, AntecedentesHallazgos, AntecedentesResponsableFaena, AntecedentesUbicacion, Btnexcel, BtnPdfReporte } from "../../index";
 import { supabase } from "../../supabase/supabase.config";
 import image from "./pya.png";
 import * as XLSX from 'xlsx';
@@ -44,6 +44,32 @@ export function ReporteTemplate() {
   const [reportes, setReportes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hallazgos, setHallazgos] = useState([crearHallazgo()]);
+
+    // 🔍 búsqueda
+  const [search, setSearch] = useState("");
+
+  // 🎯 filtros
+  const [filters, setFilters] = useState({
+    empresa: "",
+    region: "",
+    actividad: "",
+  });
+
+  const [visibleColumns, setVisibleColumns] = useState({
+  id: true,
+  tipo_obra: true,
+  codigo_obra: true,
+  fecha_ids: true,
+  empresa: true,
+  region: true,
+  actividad: true,
+  responsable: true,
+  latitud: true,
+});
+
+const [openColumns, setOpenColumns] = useState(false);
+
+
 
 
   const [obraData, setObraData] = useState({
@@ -131,6 +157,30 @@ export function ReporteTemplate() {
       if (!error) setReportes(data);
       setLoading(false);
     }
+
+    const reportesFiltrados = reportes.filter((r) => {
+      const searchMatch =
+        search === "" ||
+        Object.values(r)
+          .join(" ")
+          .toLowerCase()
+          .includes(search.toLowerCase());
+
+      const empresaMatch =
+        !filters.empresa ||
+        r.nombre_empresa?.toLowerCase().includes(filters.empresa.toLowerCase());
+
+      const regionMatch =
+        !filters.region ||
+        r.region?.toLowerCase().includes(filters.region.toLowerCase());
+
+      const actividadMatch =
+        !filters.actividad ||
+        r.tipo_actividad?.toLowerCase().includes(filters.actividad.toLowerCase());
+
+      return searchMatch && empresaMatch && regionMatch && actividadMatch;
+    });
+
 
     const exportarExcel = () => {
         const workbook = XLSX.utils.book_new();
@@ -359,8 +409,51 @@ export function ReporteTemplate() {
     <span>Listado general de inspecciones</span>
   </TitleGroup>
 
+
   <Btnexcel />
 </TableHeader>
+
+<TableControls>
+  <FiltersBar>
+    <input
+      type="text"
+      placeholder="Buscar en todos los campos..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+    />
+  </FiltersBar>
+
+  <ColumnDropdown>
+    <button
+      className="toggle"
+      onClick={() => setOpenColumns(!openColumns)}
+    >
+      Columnas ▾
+    </button>
+
+    {openColumns && (
+      <div className="menu">
+        {Object.keys(visibleColumns).map((col) => (
+          <label key={col}>
+            <input
+              type="checkbox"
+              checked={visibleColumns[col]}
+              onChange={() =>
+                setVisibleColumns({
+                  ...visibleColumns,
+                  [col]: !visibleColumns[col],
+                })
+              }
+            />
+            {col.replace("_", " ")}
+          </label>
+        ))}
+      </div>
+    )}
+  </ColumnDropdown>
+</TableControls>
+
+
 
 
   <TableWrapper>
@@ -382,19 +475,23 @@ export function ReporteTemplate() {
           </tr>
         </thead>
         <tbody>
-          {reportes.map((r) => (
+          {reportesFiltrados.map((r) => (
             <tr key={r.reporte_id}>
-              <td>{r.reporte_id}</td>
-              <td>{r.tipo_obra}</td>
-              <td>{r.codigo_obra}</td>
-              <td>{r.fecha_ids}</td>
-              <td>{r.nombre_empresa}</td>
-              <td>{r.region}</td>
-              <td>{r.tipo_actividad}</td>
-              <td>{r.nombre_responsable}</td>
-              <td>{r.geo_latitud}</td>
+              {visibleColumns.id && <td>{r.reporte_id}</td>}
+              {visibleColumns.tipo_obra && <td>{r.tipo_obra}</td>}
+              {visibleColumns.codigo_obra && <td>{r.codigo_obra}</td>}
+              {visibleColumns.fecha_ids && <td>{r.fecha_ids}</td>}
+              {visibleColumns.empresa && <td>{r.nombre_empresa}</td>}
+              {visibleColumns.region && <td>{r.region}</td>}
+              {visibleColumns.actividad && <td>{r.tipo_actividad}</td>}
+              {visibleColumns.responsable && <td>{r.nombre_responsable}</td>}
+              {visibleColumns.latitud && <td>{r.geo_latitud}</td>}
+              <td>
+                <BtnPdfReporte reporteId={r.reporte_id} />
+              </td>
             </tr>
           ))}
+
         </tbody>
       </table>
     )}
@@ -857,4 +954,80 @@ const TableWrapper = styled.div`
   }
 `;
 
+
+const FiltersBar = styled.div`
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  input {
+    padding: 10px 14px;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.85rem;
+    min-width: 180px;
+  }
+`;
+
+const ColumnDropdown = styled.div`
+  position: relative;
+
+  .toggle {
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    background: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #334155;
+
+    &:hover {
+      background: #f8fafc;
+    }
+  }
+
+  .menu {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    min-width: 220px;
+    background: white;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+    z-index: 100;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  label {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #334155;
+    cursor: pointer;
+
+    input {
+      cursor: pointer;
+    }
+  }
+`;
+
+const TableControls = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin: 20px 25px 5px 25px;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
 

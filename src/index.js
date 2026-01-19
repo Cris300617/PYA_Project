@@ -41,3 +41,4 @@ export * from './components/organismos/contentForms/AntecedentesInspeccion';
 export * from './components/organismos/contentForms/AntecedentesResponsableFaena';
 export * from './components/organismos/contentForms/AntecedentesUbicacion';
 export * from './components/moleculas/Btnexcel';
+export * from './components/moleculas/BtnPdfReporte';
