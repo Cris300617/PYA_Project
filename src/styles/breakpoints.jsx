@@ -1,5 +1,5 @@
 const sizes = {
-    mobile: "240px",
+    mobile: "0px",
     tablet: "768px",
     laptop: "992px",
     desktop: "1200px",
