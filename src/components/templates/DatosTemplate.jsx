@@ -1,209 +1,180 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { jsPDF } from "jspdf";
-import { Sidebar, Search, Registro, TablaInforme } from "../../index";
-import image from "./pya.png";
+import { Sidebar, createUser } from "../../index";
 import { supabase } from "../../supabase/supabase.config";
-import {Map,Marker,} from "@vis.gl/react-google-maps";
-
+import image from "./pya.png";
 
 export function DatosTemplate() {
-  const [open, setOpen] = useState(false);
-  const [location, setLocation] = useState(null);
-  const [error, setError] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+  const [usuarios, setUsuarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [form, setForm] = useState({
+  const [formUser, setFormUser] = useState({
+    email: "",
+    password: "",
     nombre: "",
-    rut: "",
-    correo: "",
-    telefono: "",
-    profesion: "",
+    username: "",
+    rol: "user",
   });
 
-
-  const obtenerUbicacion = () => {
-    if (!navigator.geolocation) {
-      setError("La geolocalización no es compatible.");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-        setError(null);
-      },
-      () => {
-        setError("No se pudo obtener la ubicación.");
-        setLocation(null);
-      }
-    );
-  };
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    const { error } = await supabase
-      .from("tablaprueba1")
-      .insert([form]);
-
-    if (error) {
-      console.error("Error al insertar:", error);
-      return;
-    }
-
-    setForm({
-      nombre: "",
-      rut: "",
-      correo: "",
-      telefono: "",
-      profesion: "",
-    });
-
-    setOpen(false);
+  async function cargarUsuarios() {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, rol, username, nombre, created_at");
+    if (!error) setUsuarios(data || []);
+    setLoading(false);
   }
 
-  const generarPDF = () => {
-    const pdf = new jsPDF();
+  useEffect(() => {
+    cargarUsuarios();
+  }, []);
 
-    pdf.setFontSize(18);
-    pdf.text("Informe de Postulante", 20, 20);
+  async function teUser() {
+    if (submitting) return; // evita doble submit
+    setSubmitting(true);
 
-    pdf.setFontSize(12);
-    pdf.text(`Nombre: ${form.nombre}`, 20, 40);
-    pdf.text(`RUT: ${form.rut}`, 20, 50);
-    pdf.text(`Correo: ${form.correo}`, 20, 60);
-    pdf.text(`Teléfono: ${form.telefono}`, 20, 70);
-    pdf.text(`Profesión: ${form.profesion}`, 20, 80);
+    try {
+      await createUser(formUser);
 
-    pdf.save(`Reporte_${form.nombre}.pdf`);
-    setOpen(false);
-  };
+      alert("Usuario creado correctamente");
+      setOpenModal(false);
+
+      // reset completo de formulario
+      setFormUser({
+        email: "",
+        password: "",
+        nombre: "",
+        username: "",
+        rol: "user",
+      });
+
+      cargarUsuarios();
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Error al crear usuario");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
-      <Container>
-        <Sidebar />
+    <Container>
+      <Sidebar />
 
-        <header className="header-home">
-          D-<span>Project</span>
-        </header>
+      <TableSection>
+        <TableHeader>
+          <TitleGroup>
+            <h2>Usuarios</h2>
+            <span>Crea, edita y elimina usuarios</span>
+          </TitleGroup>
 
-        <section>
-          <button onClick={obtenerUbicacion}>
-            Obtener mi ubicación
+          <button
+            onClick={() => setOpenModal(true)}
+            style={{
+              padding: "12px 22px",
+              borderRadius: "999px",
+              background: "linear-gradient(90deg,#1c576e,#15e47c)",
+              color: "white",
+              fontWeight: 600,
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            + Nuevo usuario
           </button>
+        </TableHeader>
 
-          {location ? (
-            <p style={{color: "red"}}>
-              Latitud: {location.lat} | Longitud: {location.lng}
-            </p>
-          ) : error ? (
-            <p className="error">{error}</p>
-          ) : (
-            <p style={{color: "red"}}>Presiona el botón para mostrar el mapa</p>
-          )}
+        <TableCard>
+          <TableWrapper>
+            {loading ? (
+              <p>Cargando...</p>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th>Creado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {usuarios.map((u) => (
+                    <tr key={u.id}>
+                      <td>
+                        <strong>{u.username}</strong>
+                        <span>{u.nombre}</span>
+                      </td>
+                      <td>
+                        <RoleBadge role={u.rol}>{u.rol}</RoleBadge>
+                      </td>
+                      <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </TableWrapper>
+        </TableCard>
+      </TableSection>
 
-          {location && (
-            <div className="map-container">
-              <Map style={{ borderRadius: "20px" }} 
-              defaultZoom={13}
-              defaultCenter={location} 
-              gestureHandling={"greedy"} 
-              disableDefaultUI
-              >
-                <Marker position={location} />
-              </Map>
+      {openModal && (
+        <Modal>
+          <div className="modal">
+            <img src={image} alt="logo" />
+            <h3>Crear usuario</h3>
+
+            <input
+              placeholder="Nombre de usuario (ej: CPICARTE)"
+              value={formUser.username}
+              onChange={(e) =>
+                setFormUser({ ...formUser, username: e.target.value.toUpperCase() })
+              }
+            />
+
+            <input
+              placeholder="Email"
+              value={formUser.email}
+              onChange={(e) => setFormUser({ ...formUser, email: e.target.value })}
+            />
+
+            <input
+              type="password"
+              placeholder="Contraseña"
+              value={formUser.password}
+              onChange={(e) => setFormUser({ ...formUser, password: e.target.value })}
+            />
+
+            <input
+              placeholder="Nombre"
+              value={formUser.nombre}
+              onChange={(e) => setFormUser({ ...formUser, nombre: e.target.value })}
+            />
+
+            <select
+              value={formUser.rol}
+              onChange={(e) => setFormUser({ ...formUser, rol: e.target.value })}
+            >
+              <option value="user">Usuario</option>
+              <option value="admin">Administrador</option>
+            </select>
+
+            <div className="actions">
+              <button className="cancel" onClick={() => setOpenModal(false)}>
+                Cancelar
+              </button>
+              <button className="create" onClick={teUser} disabled={submitting}>
+                {submitting ? "Creando..." : "Crear usuario"}
+              </button>
             </div>
-          )}
-        </section>
-
-        <section className="search">
-          <Search />
-        </section>
-
-        <section className="reg">
-          <TablaInforme />
-          <Registro />
-        </section>
-
-        <section className="btn-crear">
-          <button onClick={() => setOpen(true)}>
-            ➕ Crear Reporte
-          </button>
-        </section>
-
-        {open && (
-          <Form onSubmit={handleSubmit}>
-            <div className="modal">
-              <img src={image} alt="logo" />
-              <h3>Nuevo Informe</h3>
-              <span className="sub-txt">
-                Rellena los campos con la información necesaria
-              </span>
-
-              <input
-                name="nombre"
-                value={form.nombre}
-                placeholder="Nombre completo"
-                onChange={handleChange}
-              />
-              <input
-                name="rut"
-                value={form.rut}
-                placeholder="RUT"
-                onChange={handleChange}
-              />
-              <input
-                name="correo"
-                value={form.correo}
-                placeholder="Correo"
-                onChange={handleChange}
-              />
-              <input
-                name="telefono"
-                value={form.telefono}
-                placeholder="Teléfono"
-                onChange={handleChange}
-              />
-              <input
-                name="profesion"
-                value={form.profesion}
-                placeholder="Profesión"
-                onChange={handleChange}
-              />
-
-              <div className="actions">
-                <button
-                  type="button"
-                  className="cancel"
-                  onClick={() => setOpen(false)}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  className="create"
-                  onClick={generarPDF}
-                >
-                  Generar PDF
-                </button>
-                <button className="create" type="submit">
-                  Subir
-                </button>
-              </div>
-            </div>
-          </Form>
-        )}
-      </Container>
- 
+          </div>
+        </Modal>
+      )}
+    </Container>
   );
 }
+
 
 
 const Container = styled.div`
@@ -212,142 +183,126 @@ const Container = styled.div`
   padding-left: 72px;
   font-family: "Poppins", sans-serif;
 
-  
-.map-container {
-  height: 500px;
-  width: 50%;
-  border: 2px solid black;
-  border-radius: 20px;
-}
-
-
-.header-home {
-  position: relative;
-  margin-left: -72px;   
-  padding-left: 72px;   
-  background-color: rgb(236, 238, 248);
-  color: #53eb67;
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 600;
-  padding-top: 20px;
-  padding-bottom: 20px;
-
-  span {
-    color: #00ffc3;
-  }
-}
-
-.lat{
-  color: red;
-}
-
-  .btn-crear {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 100;
-
-    button {
-      background: linear-gradient(90deg, #1c576e, #15e47c);
-      border: none;
-      padding: 14px 28px;
-      border-radius: 30px;
-      color: #002b36;
-      font-size: 1rem;
-      cursor: pointer;
-      font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0,0,0,.2);
-
-      &:hover {
-        transform: translateY(-2px);
-      }
-    }
-  }
-
-  .search{
-    margin: 20px 0
-  }
-
-  .reg {
-  display: grid;
-  grid-template-columns: 1fr 230px 349px ;
-  gap: 32px;
-  padding: 40px;
-
-
   @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
+    padding-left: 0;
   }
-}
-
-  
 `;
 
-const Form = styled.form`
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
+const TableSection = styled.section`
+  padding: 30px;
+`;
+
+const TableHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  z-index: 200;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+`;
 
-  .modal {
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    width: 400px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+const TitleGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 
-    h3 {
-      text-align: center;
-      margin-bottom: 10px;
-      color: black;
-    }
-
-    .sub-txt{
-        color: #5a5555;
-    }
-
-    input {
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 0.95rem;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
-
-      button {
-        padding: 10px 18px;
-        border-radius: 20px;
-        border: none;
-        cursor: pointer;
-      }
-
-      .cancel {
-        background: #eee;
-      }
-
-      .create {
-        background: #4ac8a5;
-        color: white;
-      }
-    }
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0f172a;
+    padding-left: 14px;
+    position: relative;
   }
 
+  h2::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 70%;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #15e47c, #1c576e);
+  }
+
+  span {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+`;
+
+const TableCard = styled.div`
+  margin-top: 30px;
+  max-width: 900px;
+  background: white;
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  padding: 20px;
+`;
+
+const TableWrapper = styled.div`
+  overflow-x: auto;
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  thead {
+    background: #f1f5f9;
+  }
+
+  th {
+    padding: 14px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #475569;
+    font-weight: 700;
+  }
+
+  td {
+    padding: 14px;
+    border-top: 1px solid #e5e7eb;
+    vertical-align: middle;
+  }
+
+  td strong {
+    display: block;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  td span {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+  }
+`;
+
+const RoleBadge = styled.span`
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+
+  background: ${({ role }) =>
+    role === "admin"
+      ? "rgba(34,197,94,.15)"
+      : "rgba(59,130,246,.15)"};
+
+  color: ${({ role }) =>
+    role === "admin" ? "#166534" : "#1e40af"};
 `;
 
 const Modal = styled.div`
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,.6);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -355,52 +310,46 @@ const Modal = styled.div`
 
   .modal {
     background: white;
-    padding: 30px;
-    border-radius: 16px;
-    width: 400px;
+    padding: 32px;
+    border-radius: 18px;
+    width: 100%;
+    max-width: 520px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
+  }
 
-    h3 {
-      text-align: center;
-      margin-bottom: 10px;
-      color: black;
-    }
+  img {
+    max-width: 200px;
+  }
 
-    .sub-txt{
-        color: #5a5555;
-    }
+  input,
+  select {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+  }
 
-    input {
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 0.95rem;
-    }
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
 
-    .actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
+  .cancel {
+    background: #e5e7eb;
+    padding: 12px 20px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+  }
 
-      button {
-        padding: 10px 18px;
-        border-radius: 20px;
-        border: none;
-        cursor: pointer;
-      }
-
-      .cancel {
-        background: #eee;
-      }
-
-      .create {
-        background: #4ac8a5;
-        color: white;
-      }
-    }
+  .create {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    padding: 12px 20px;
+    border-radius: 999px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
   }
 `;
-
-
