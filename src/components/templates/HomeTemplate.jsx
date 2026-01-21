@@ -10,7 +10,7 @@ import { Icon } from "@iconify/react";
 export function HomeTemplate() {
   return (
     <Container>
-      <Sidebar/>
+      
       <section className="header-home">
         Bienvenido a <span>D-Project</span>
       </section>

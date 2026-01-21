@@ -3,12 +3,17 @@ import styled from "styled-components";
 import { Sidebar, createUser } from "../../index";
 import { supabase } from "../../supabase/supabase.config";
 import image from "./pya.png";
+import { Icon } from "@iconify/react";
 
-export function DatosTemplate() {
+export function PerfilAdminTemplate() {
   const [openModal, setOpenModal] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editUser, setEditUser] = useState(null);
+  const [deleteUser, setDeleteUser] = useState(null);
+   const [currentUser, setCurrentUser] = useState(null);
+
 
   const [formUser, setFormUser] = useState({
     email: "",
@@ -18,21 +23,37 @@ export function DatosTemplate() {
     rol: "user",
   });
 
+    async function cargarUsuarioActual() {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth?.user) return;
+
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, email, nombre, username, rol")
+      .eq("id", auth.user.id)
+      .single();
+
+    setCurrentUser(data);
+  }
+
+
   async function cargarUsuarios() {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from("profiles")
       .select("id, rol, username, nombre, created_at");
-    if (!error) setUsuarios(data || []);
+
+    setUsuarios(data || []);
     setLoading(false);
   }
 
   useEffect(() => {
+    cargarUsuarioActual();
     cargarUsuarios();
   }, []);
 
   async function teUser() {
-    if (submitting) return; // evita doble submit
+    if (submitting) return; 
     setSubmitting(true);
 
     try {
@@ -41,7 +62,7 @@ export function DatosTemplate() {
       alert("Usuario creado correctamente");
       setOpenModal(false);
 
-      // reset completo de formulario
+  
       setFormUser({
         email: "",
         password: "",
@@ -59,31 +80,87 @@ export function DatosTemplate() {
     }
   }
 
+  async function actualizarUsuario() {
+  if (!editUser) return;
+
+  const confirmar = confirm("¿Deseas guardar los cambios del usuario?");
+  if (!confirmar) return;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      nombre: editUser.nombre,
+      username: editUser.username,
+      rol: editUser.rol,
+    })
+    .eq("id", editUser.id);
+
+  if (error) {
+    alert("Error al actualizar usuario");
+    return;
+  }
+
+  alert("Usuario actualizado correctamente");
+  setEditUser(null);
+  cargarUsuarios();
+}
+
+
+async function eliminarUsuario(user) {
+  const confirmar = confirm(
+    `¿Seguro que deseas eliminar al usuario ${user.username}?`
+  );
+
+  if (!confirmar) return;
+
+  const { error } = await supabase
+    .from("profiles")
+    .delete()
+    .eq("id", user.id);
+
+  if (error) {
+    alert("Error al eliminar usuario");
+    return;
+  }
+
+  alert("Usuario eliminado correctamente");
+  cargarUsuarios();
+}
+
+
   return (
     <Container>
-      <Sidebar />
-
       <TableSection>
         <TableHeader>
           <TitleGroup>
             <h2>Usuarios</h2>
             <span>Crea, edita y elimina usuarios</span>
           </TitleGroup>
+            {currentUser && (
+              <RightHeader>
+                {currentUser.rol === "admin" && (
+                  <button onClick={() => setOpenModal(true)}>
+                    <Icon icon="humbleicons:user-add" width="30" />
+                  </button>
+                )}
+                <UserInfo>
+                  <div className="avatar">
+                    {currentUser.username?.charAt(0)}
+                  </div>
 
-          <button
-            onClick={() => setOpenModal(true)}
-            style={{
-              padding: "12px 22px",
-              borderRadius: "999px",
-              background: "linear-gradient(90deg,#1c576e,#15e47c)",
-              color: "white",
-              fontWeight: 600,
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            + Nuevo usuario
-          </button>
+                  <div className="text">
+                    <strong>{currentUser.nombre}</strong>
+                    <span>{currentUser.email}</span>
+                  </div>
+
+                  <RoleBadge role={currentUser.rol}>
+                    {currentUser.rol}
+                  </RoleBadge>
+                </UserInfo>
+
+                
+              </RightHeader>
+            )}
         </TableHeader>
 
         <TableCard>
@@ -97,6 +174,7 @@ export function DatosTemplate() {
                     <th>Usuario</th>
                     <th>Rol</th>
                     <th>Creado</th>
+                    {currentUser?.rol === "admin" && <th />}
                   </tr>
                 </thead>
                 <tbody>
@@ -110,6 +188,25 @@ export function DatosTemplate() {
                         <RoleBadge role={u.rol}>{u.rol}</RoleBadge>
                       </td>
                       <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                      {currentUser?.rol === "admin" && (
+                        <td>
+                          <div className="row-actions">
+                            <Icon
+                              icon="majesticons:edit-pen-2-line"
+                              className="edit"
+                              onClick={() => setEditUser(u)}
+                            />
+
+                            <Icon
+                              icon="majesticons:delete-bin-line"
+                              className="delete"
+                              onClick={() => eliminarUsuario(u)}
+                            />
+                          </div>
+                        </td>
+                      )}
+
+
                     </tr>
                   ))}
                 </tbody>
@@ -170,7 +267,60 @@ export function DatosTemplate() {
             </div>
           </div>
         </Modal>
+
+        
       )}
+
+      {editUser && (
+  <Modal>
+    <div className="modal">
+      <h3>Editar usuario</h3>
+
+      <input
+        value={editUser.username}
+        onChange={(e) =>
+          setEditUser({
+            ...editUser,
+            username: e.target.value.toUpperCase(),
+          })
+        }
+      />
+
+      <input
+        value={editUser.nombre}
+        onChange={(e) =>
+          setEditUser({
+            ...editUser,
+            nombre: e.target.value,
+          })
+        }
+      />
+
+      <select
+        value={editUser.rol}
+        onChange={(e) =>
+          setEditUser({
+            ...editUser,
+            rol: e.target.value,
+          })
+        }
+      >
+        <option value="user">Usuario</option>
+        <option value="admin">Administrador</option>
+      </select>
+
+      <div className="actions">
+        <button className="cancel" onClick={() => setEditUser(null)}>
+          Cancelar
+        </button>
+        <button className="create" onClick={actualizarUsuario}>
+          Guardar cambios
+        </button>
+      </div>
+    </div>
+  </Modal>
+)}
+
     </Container>
   );
 }
@@ -182,6 +332,35 @@ const Container = styled.div`
   background: #ffffff;
   padding-left: 72px;
   font-family: "Poppins", sans-serif;
+  color: black;
+
+  .row-actions {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.row-actions svg {
+  font-size: 22px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.row-actions .eye:hover {
+  color: #e6d114;
+  transform: scale(1.15);
+}
+
+.row-actions .edit:hover {
+  color: #00b894;
+  transform: scale(1.15);
+}
+
+.row-actions .delete:hover {
+  color: #e61515;
+  transform: scale(1.15);
+}
 
   @media (max-width: 1024px) {
     padding-left: 0;
@@ -251,6 +430,7 @@ const TableWrapper = styled.div`
 
   thead {
     background: #f1f5f9;
+    text-align: left;
   }
 
   th {
@@ -350,6 +530,59 @@ const Modal = styled.div`
     border-radius: 999px;
     border: none;
     font-weight: 600;
+    cursor: pointer;
+  }
+`;
+
+
+
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: white;
+  padding: 10px 14px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #15e47c, #1c576e);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+`;
+
+
+const RightHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  button {
+    padding: 12px 22px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1c576e, #15e47c);
+    color: white;
+    font-weight: 600;
+    border: none;
     cursor: pointer;
   }
 `;

@@ -88,7 +88,6 @@ export function DatosTemplate() {
 
   return (
       <Container>
-        <Sidebar />
 
         <header className="header-home">
           D-<span>Project</span>

@@ -32,8 +32,8 @@ export function Sidebar() {
           </Item>
 
           <Item to="/dates">
-            <Icon icon="solar:settings-outline" />
-            <span>Datos</span>
+            <Icon icon="ant-design:user-outlined" />
+            <span>Perfil</span>
           </Item>
 
           <Item to="/activity">

@@ -27,8 +27,8 @@ export * from './components/templates/FormularioTemplate'
 export * from './components/organismos/Search/Search';
 export * from './components/moleculas/Registros';
 export * from './components/moleculas/TablaInforme';
-export * from './pages/Dates';
-export * from './components/templates/DatosTemplate';
+export * from './pages/PerfilAdmin';
+export * from './components/templates/PerfilAdminTemplate';
 export * from './components/organismos/contentForms/AntecedentesObra';
 export * from './components/organismos/formularios/FormSection';
 export * from './pages/Reporte';
@@ -43,3 +43,4 @@ export * from './components/organismos/contentForms/AntecedentesUbicacion';
 export * from './components/moleculas/Btnexcel';
 export * from './components/moleculas/BtnPdfReporte';
 export * from './services/adminUsers';
+export * from './components/organismos/Sidebar/DashboardLayout';

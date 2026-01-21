@@ -5,51 +5,46 @@ export function AntecedentesObra({ data, setData }) {
   return (
     <Container>
         <section className="box">
-          <label>Documento Asociado</label>
-          {data.tipo_obra === "codigo_obra" ? (
-            <div className="row">
-              <select
-                value={data.tipo_obra}
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    tipo_obra: e.target.value,
-                    codigo_obra: "",
-                  })
-                }
-              >
-                <option value="">Seleccionar opción</option>
-                <option value="codigo_obra">Código de Obra</option>
-              </select>
+      <label>Documento Asociado</label>
 
-              <input
-                type="text"
-                placeholder="Ingrese código de obra"
-                value={data.codigo_obra}
-                onChange={(e) =>
-                  setData({
-                    ...data,
-                    codigo_obra: e.target.value,
-                  })
-                }
-              />
-            </div>
-          ) : (
-            <select
-              value={data.tipo_obra}
-              onChange={(e) =>
-                setData({
-                  ...data,
-                  tipo_obra: e.target.value,
-                  codigo_obra: "",
-                })
-              }
-            >
-              <option value="">Seleccionar opción</option>
-              <option value="codigo_obra">Código de Obra</option>
-            </select>
-          )}
-        </section>
+      <div className="row">
+        <select
+          value={data.tipo_obra}
+          onChange={(e) =>
+            setData({
+              ...data,
+              tipo_obra: e.target.value,
+              codigo_obra: "",
+            })
+          }
+        >
+          <option value="">Seleccionar opción</option>
+          <option value="codigo_obra">Código de Obra</option>
+          <option value="permiso">Permiso Documento</option>
+          <option value="otro">Otro</option>
+        </select>
+
+        {data.tipo_obra && (
+          <input
+            type="text"
+            placeholder={
+              data.tipo_obra === "codigo_obra"
+                ? "Ingrese código de obra"
+                : data.tipo_obra === "permiso"
+                ? "Ingrese permiso del documento"
+                : "Ingrese descripción"
+            }
+            value={data.codigo_obra}
+            onChange={(e) =>
+              setData({
+                ...data,
+                codigo_obra: e.target.value,
+              })
+            }
+          />
+        )}
+      </div>
+    </section>
         
     </Container>
   );

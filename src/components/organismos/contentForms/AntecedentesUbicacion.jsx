@@ -1,120 +1,156 @@
 import styled from "styled-components";
+import { Map, Marker } from "@vis.gl/react-google-maps";
+import { Icon } from "@iconify/react";
+
 
 export function AntecedentesUbicacion({ data, setData }) {
+  const obtenerUbicacion = () => {
+    if (!navigator.geolocation) {
+      alert("La geolocalización no es compatible con este navegador");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setData({
+          ...data,
+          geo_latitud: position.coords.latitude,
+          geo_longitud: position.coords.longitude,
+          geo_altitud: position.coords.altitude ?? 0,
+        });
+      },
+      () => {
+        alert("No se pudo obtener la ubicación");
+      }
+    );
+  };
+
+  const location =
+    data.geo_latitud && data.geo_longitud
+      ? { lat: data.geo_latitud, lng: data.geo_longitud }
+      : null;
+
   return (
     <Container>
       <section className="box">
-
         <div className="field">
           <label>Región</label>
           <input
-            type="text"
-            placeholder="Región"
             value={data.region || ""}
-            onChange={(e) =>
-              setData({ ...data, region: e.target.value })
-            }
+            onChange={(e) => setData({ ...data, region: e.target.value })}
           />
         </div>
 
         <div className="field">
           <label>Zona</label>
           <input
-            type="text"
-            placeholder="Zona"
             value={data.zona || ""}
-            onChange={(e) =>
-              setData({ ...data, zona: e.target.value })
-            }
+            onChange={(e) => setData({ ...data, zona: e.target.value })}
           />
         </div>
 
         <div className="field">
           <label>Delegación</label>
           <input
-            type="text"
-            placeholder="Delegación"
             value={data.delegacion || ""}
-            onChange={(e) =>
-              setData({ ...data, delegacion: e.target.value })
-            }
+            onChange={(e) => setData({ ...data, delegacion: e.target.value })}
           />
         </div>
 
         <div className="field">
           <label>Dirección</label>
           <input
-            type="text"
-            placeholder="Dirección"
             value={data.direccion || ""}
-            onChange={(e) =>
-              setData({ ...data, direccion: e.target.value })
-            }
+            onChange={(e) => setData({ ...data, direccion: e.target.value })}
           />
         </div>
 
         <div className="field">
-          <label>Latitud</label>
-          <input
-            type="number"
-            step="any"
-            placeholder="Latitud"
-            value={data.geo_latitud ?? ""}
-            onChange={(e) =>
-              setData({
-                ...data,
-                geo_latitud:
-                  e.target.value === "" ? null : parseFloat(e.target.value),
-              })
-            }
-          />
-        </div>
+        <label>Latitud</label>
+        <input
+          type="number"
+          step="any"
+          value={data.geo_latitud ?? ""}
+          onChange={(e) =>
+            setData({
+              ...data,
+              geo_latitud:
+                e.target.value === "" ? null : parseFloat(e.target.value),
+            })
+          }
+        />
+      </div>
+
+      <div className="field">
+        <label>Longitud</label>
+        <input
+          type="number"
+          step="any"
+          value={data.geo_longitud ?? ""}
+          onChange={(e) =>
+            setData({
+              ...data,
+              geo_longitud:
+                e.target.value === "" ? null : parseFloat(e.target.value),
+            })
+          }
+        />
+      </div>
+
+      <div className="field">
+        <label>Altitud</label>
+        <input
+          type="number"
+          step="any"
+          value={data.geo_altitud ?? ""}
+          onChange={(e) =>
+            setData({
+              ...data,
+              geo_altitud:
+                e.target.value === "" ? 0 : parseFloat(e.target.value),
+            })
+          }
+        />
+      </div>
+
 
         <div className="field">
-          <label>Longitud</label>
-          <input
-            type="number"
-            step="any"
-            placeholder="Longitud"
-            value={data.geo_longitud ?? ""}
-            onChange={(e) =>
-              setData({
-                ...data,
-                geo_longitud:
-                  e.target.value === "" ? null : parseFloat(e.target.value),
-              })
-            }
-          />
+          <label>&nbsp;</label>
+          <button className="geo-btn" onClick={obtenerUbicacion}>
+            <Icon icon="mdi:crosshairs-gps" width="20" />
+            <span>Usar mi ubicación</span>
+          </button>
+
         </div>
 
-        <div className="field">
-          <label>Altitud</label>
-          <input
-            type="number"
-            step="any"
-            placeholder="Altitud"
-            value={data.geo_altitud ?? ""}
-            onChange={(e) =>
-              setData({
-                ...data,
-                geo_altitud:
-                  e.target.value === "" ? null : parseFloat(e.target.value),
-              })
-            }
-          />
+        <div className="map-wrapper">
+          {location ? (
+            <Map
+              defaultZoom={14}
+              defaultCenter={location}
+              gestureHandling="greedy"
+              disableDefaultUI
+            >
+              <Marker position={location} />
+            </Map>
+          ) : (
+            <div className="map-placeholder">
+              Presiona el botón para mostrar el mapa
+            </div>
+          )}
         </div>
-
       </section>
     </Container>
   );
 }
+
 
 const Container = styled.div`
   width: 100%;
 
   .box {
     display: grid;
-    grid-template-columns: repeat(2, minmax(240px, 1fr)); 
+    grid-template-columns: repeat(3, minmax(300px, 1fr)); 
     column-gap: 20px;
     row-gap: 16px;
   }
@@ -147,9 +183,77 @@ const Container = styled.div`
     margin-bottom: 5px;
   }
 
+ .geo-btn {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: none;
+
+  background: linear-gradient(135deg, #15e47c, #0ecb6a);
+  color: #064e3b;
+
+  font-weight: 600;
+  font-size: 0.9rem;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 14px rgba(21, 228, 124, 0.25);
+}
+
+.geo-btn svg {
+  color: #064e3b;
+}
+
+.geo-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(21, 228, 124, 0.35);
+}
+
+.geo-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(21, 228, 124, 0.25);
+}
+
+.geo-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+  .map-wrapper {
+    grid-column: 3;
+    grid-row: 1 / span 4;
+    height: 100%;
+    min-height: 260px;
+    max-width: 280px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid #e5e7eb;
+  }
+
+  .map-placeholder {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 0.85rem;
+  }
+
   @media (max-width: 1024px) {
     .box {
       grid-template-columns: 1fr;
+    }
+
+    .map-wrapper {
+      grid-column: auto;
+      grid-row: auto;
+      height: 240px;
     }
   }
 

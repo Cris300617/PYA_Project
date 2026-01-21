@@ -61,6 +61,7 @@ const Container = styled.div`
 
   input {
     width: 100%;
+    max-width: 180px;
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #cbd5e1;

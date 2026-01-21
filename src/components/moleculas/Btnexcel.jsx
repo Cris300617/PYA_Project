@@ -119,7 +119,7 @@ export function Btnexcel() {
             {Object.entries(opciones).map(([key, opt]) => (
               <DropdownItem
                 key={key}
-                active={vistaSeleccionada === key}
+                $active={vistaSeleccionada === key}
                 onClick={() => {
                   setVistaSeleccionada(key);
                   setOpen(false);
@@ -128,6 +128,7 @@ export function Btnexcel() {
                 {opt.icon}
                 {opt.label}
               </DropdownItem>
+
             ))}
           </DropdownMenu>
         )}
@@ -224,24 +225,22 @@ const DropdownMenu = styled.div`
 const DropdownItem = styled.button`
   width: 100%;
   padding: 12px 14px;
-  
 
   display: flex;
   align-items: center;
   gap: 10px;
 
-  background: ${({ active }) =>
-    active ? "#f0fdf4" : "transparent"};
+  background: ${({ $active }) =>
+    $active ? "#f0fdf4" : "transparent"};
 
-  color: ${({ active }) =>
-    active ? "#166534" : "#334155"};
+  color: ${({ $active }) =>
+    $active ? "#166534" : "#334155"};
 
   font-size: 12px;
   font-weight: 600;
 
   border: none;
   cursor: pointer;
-
   transition: background 0.15s ease;
 
   &:hover {
@@ -249,10 +248,11 @@ const DropdownItem = styled.button`
   }
 
   svg {
-    color: ${({ active }) =>
-      active ? "#16a34a" : "#94a3b8"};
+    color: ${({ $active }) =>
+      $active ? "#16a34a" : "#94a3b8"};
   }
 `;
+
 
 /* ===== Botón Excel ===== */
 const ExcelButton = styled.button`

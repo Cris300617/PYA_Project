@@ -61,7 +61,6 @@ const [form, setForm] = useState({
 
   return (
       <Container>
-        <Sidebar />
 
         <header className="header-home">
           D-<span>Project</span>

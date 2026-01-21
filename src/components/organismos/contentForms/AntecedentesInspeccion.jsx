@@ -30,14 +30,21 @@ export function AntecedentesInspeccion({ data, setData }) {
 
           <div className="field full">
             <label>División</label>
-            <input
-              type="text"
-              placeholder="Ej: Distribución Norte"
-              value={data.division || ""}
+
+            <select
+              value={data.division}
               onChange={(e) =>
-                setData({ ...data, division: e.target.value })
+                setData({
+                  ...data,
+                  division: e.target.value,
+                })
               }
-            />
+            >
+              <option value="">Seleccionar opción</option>
+              <option value="Seguridad y Salud">Seguridad y Salud</option>
+              <option value="Calidad y Medio Ambiente">Calidad y Medio Ambiente</option>
+              <option value="Linea_Roja">Linea Roja</option>
+            </select>
           </div>
 
           <div className="field sm">
@@ -64,14 +71,23 @@ export function AntecedentesInspeccion({ data, setData }) {
 
           <div className="field full">
             <label>Auditoría inicio</label>
-            <input
-              type="text"
-              placeholder="Nombre o código auditoría"
-              value={data.auditoria_inicio || ""}
-              onChange={(e) =>
-                setData({ ...data, auditoria_inicio: e.target.value })
-              }
-            />
+
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={!!data.auditoria_inicio}
+                onChange={(e) =>
+                  setData({
+                    ...data,
+                    auditoria_inicio: e.target.checked,
+                  })
+                }
+              />
+              <span className="slider" />
+              <span className="switch-label">
+                {data.auditoria_inicio ? "Sí" : "No"}
+              </span>
+            </label>
           </div>
 
         </section>
@@ -83,12 +99,6 @@ export function AntecedentesInspeccion({ data, setData }) {
 const Container = styled.div`
   width: 100%;
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px 20px;
-    align-items: start;
-  }
 
   .field {
     display: flex;
@@ -133,6 +143,71 @@ const Container = styled.div`
     border-color: #15e47c;
     box-shadow: 0 0 0 2px rgba(21, 228, 124, 0.2);
   }
+
+  select {
+    width: 240px;
+    max-width: 208px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-size: 0.9rem;
+    background: #fff;
+  }
+
+  select:focus {
+    outline: none;
+    border-color: #15e47c;
+    box-shadow: 0 0 0 2px rgba(21, 228, 124, 0.2);
+  }
+
+  .switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.switch input {
+  display: none;
+}
+
+.slider {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  background-color: #cbd5e1;
+  border-radius: 999px;
+  transition: background-color 0.25s ease;
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 3px;
+  left: 3px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Cuando está activo */
+.switch input:checked + .slider {
+  background-color: #15e47c;
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
+}
+
+.switch-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
+}
+
 
   @media (max-width: 640px) {
     .field.full {

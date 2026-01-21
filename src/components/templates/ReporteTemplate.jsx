@@ -38,12 +38,24 @@ const crearHallazgo = () => ({
   e_fotografica_cierre_hallazgo: "",
 });
 
+// const crearColaborador = () => ({
+//   id: crypto.randomUUID(),
+//   rut: "",
+//   acreditado_colaborador: "",
+//   cargo_colaborador: "",
+//   empresa_colaborador: "",
+//   observaciones_colaborador: "",
+// });
+
 
 export function ReporteTemplate() {
   const [template, setTemplate] = useState(null);
   const [reportes, setReportes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hallazgos, setHallazgos] = useState([crearHallazgo()]);
+  const [user, setUser] = useState(null);
+  const [open, setOpen] = useState(false);
+  // const [colaborador, setColaborador] = useState([crearColaborador()]);
 
   const [search, setSearch] = useState("");
 
@@ -123,11 +135,25 @@ const [openColumns, setOpenColumns] = useState(false);
     __: "",
   }); */}
   
-  const [open, setOpen] = useState(false);
+  
+
+  async function cargarUsuarioActual() {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth?.user) return;
+
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, email, nombre, username, rol")
+      .eq("id", auth.user.id)
+      .single();
+
+    setUser(data);
+  }
 
   useEffect(() => {
     obtenerTemplate();
     obtenerReportes();
+    cargarUsuarioActual();
   }, []);
 
   async function obtenerTemplate() {
@@ -179,15 +205,6 @@ const [openColumns, setOpenColumns] = useState(false);
       return searchMatch && empresaMatch && regionMatch && actividadMatch;
     });
 
-
-    const exportarExcel = () => {
-        const workbook = XLSX.utils.book_new();
-        const worksheet = XLSX.utils.json_to_sheet(reportes);
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos de Tabla');
-        XLSX.writeFile(workbook, 'datos_tabla.xlsx'); 
-        console.log("hola")
-      };
-
   async function handleSubmit(e) {
     e.preventDefault();
     if (!template) return;
@@ -198,6 +215,7 @@ const [openColumns, setOpenColumns] = useState(false);
         .insert([
           {
             form_id: template.id,
+            username: user.username,
           },
         ])
         .select()
@@ -383,6 +401,12 @@ const [openColumns, setOpenColumns] = useState(false);
     e_documental_cierre_hallazgo:"",
     e_fotografica_cierre_hallazgo:"", }]);
 
+    // setColaborador({ rut: "",
+    //   acreditado_colaborador: "",
+    //   cargo_colaborador: "",
+    //   empresa_colaborador: "",
+    //   observaciones_colaborador: "",});
+
       
       {/**AQUIIIIIII PONEEER INFOOOOOOO */}
 
@@ -393,13 +417,18 @@ const [openColumns, setOpenColumns] = useState(false);
     }
   }
 
-  if (!template) return null;
 
   return (
     <Container>
-      <Sidebar />
-
-
+      <MainContent>
+        {(!template || loading) ? (
+          <PageLoader>
+            <Spinner />
+            <LoaderText>Cargando...</LoaderText>
+          </PageLoader>
+        ) : (
+          <>
+      
       <TableSection>
   <TableHeader>
   <TitleGroup>
@@ -461,17 +490,19 @@ const [openColumns, setOpenColumns] = useState(false);
       <table>
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Tipo Obra</th>
-            <th>Código Obra</th>
-            <th>Fecha IDS</th>
-            <th>Empresa</th>
-            <th>Región</th>
-            <th>Actividad</th>
-            <th>Responsable</th>
-            <th>Latitud</th>
+            {visibleColumns.id && <th>ID</th>}
+            {visibleColumns.tipo_obra && <th>Tipo Obra</th>}
+            {visibleColumns.codigo_obra && <th>Código Obra</th>}
+            {visibleColumns.fecha_ids && <th>Fecha IDS</th>}
+            {visibleColumns.empresa && <th>Empresa</th>}
+            {visibleColumns.region && <th>Región</th>}
+            {visibleColumns.actividad && <th>Actividad</th>}
+            {visibleColumns.responsable && <th>Responsable</th>}
+            {visibleColumns.latitud && <th>Latitud</th>}
+            <th>PDF</th>
           </tr>
         </thead>
+
         <tbody>
           {reportesFiltrados.map((r) => (
             <tr key={r.reporte_id}>
@@ -576,6 +607,9 @@ const [openColumns, setOpenColumns] = useState(false);
           </div>
         </Modal>
       )}
+          </>
+        )}
+      </MainContent>
     </Container>
   );
 }
@@ -588,7 +622,7 @@ const Container = styled.div`
   font-family: "Poppins", sans-serif;
 
   @media (max-width: 1024px) {
-    padding-left: 0; /* 👈 sidebar colapsado */
+    padding-left: 0; 
   }
 
   .header-home {
@@ -929,7 +963,6 @@ const TableWrapper = styled.div`
     text-overflow: ellipsis;
   }
 
-  /* Columna id */
   td:first-child {
     font-family: monospace;
     font-size: 0.8rem;
@@ -937,12 +970,10 @@ const TableWrapper = styled.div`
     max-width: 160px;
   }
 
-  /* ultima fila sin borde */
   tbody tr:last-child td {
     border-bottom: none;
   }
 
-  /* Responsive */
   @media (max-width: 768px) {
     padding: 12px;
 
@@ -1028,4 +1059,45 @@ const TableControls = styled.div`
     align-items: stretch;
   }
 `;
+
+
+const PageLoader = styled.div`
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  background: #ffffff;
+`;
+
+const Spinner = styled.div`
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 4px solid rgba(21, 228, 124, 0.25);
+  border-top-color: #15e47c;
+  animation: spin 0.9s linear infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`;
+
+const LoaderText = styled.span`
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
+  letter-spacing: 0.02em;
+`;
+
+const MainContent = styled.main`
+  flex: 1;
+  padding: 30px;
+  position: relative;
+`;
+
+
 
