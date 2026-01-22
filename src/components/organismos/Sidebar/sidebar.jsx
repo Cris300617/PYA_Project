@@ -31,7 +31,7 @@ export function Sidebar() {
             <span>Reportes</span>
           </Item>
 
-          <Item to="/dates">
+          <Item to="/profile">
             <Icon icon="ant-design:user-outlined" />
             <span>Perfil</span>
           </Item>
@@ -84,7 +84,6 @@ const SidebarContainer = styled.aside`
     transform: translateX(0);
   }
 
-  /* 📱 MOBILE */
   @media (max-width: 768px) {
     width: 64px;
 

@@ -36,7 +36,7 @@ export function HomeTemplate() {
           </p>
         </Link>
 
-        <Link to="/dates" className="form-row">
+        <Link to="/profile" className="form-row">
           <Icon icon="majesticons:data-line" className="card-icon" />
           <h2>Control total de tus datos</h2>
           <p>

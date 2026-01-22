@@ -330,7 +330,6 @@ async function eliminarUsuario(user) {
 const Container = styled.div`
   min-height: 100vh;
   background: #ffffff;
-  padding-left: 72px;
   font-family: "Poppins", sans-serif;
   color: black;
 

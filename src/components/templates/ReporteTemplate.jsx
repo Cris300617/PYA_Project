@@ -38,6 +38,16 @@ const crearHallazgo = () => ({
   e_fotografica_cierre_hallazgo: "",
 });
 
+const crearColaborador = () => ({
+  id: crypto.randomUUID(),
+  rut_colaborador: "",
+  nombre_colaborador: "",
+  cargo_colaborador: "",
+  acreditado_colaborador: "",
+  empresa_colaborador: "",
+});
+
+
 // const crearColaborador = () => ({
 //   id: crypto.randomUUID(),
 //   rut: "",
@@ -55,6 +65,11 @@ export function ReporteTemplate() {
   const [hallazgos, setHallazgos] = useState([crearHallazgo()]);
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
+  const [colaboradores, setColaboradores] = useState([
+  crearColaborador(),
+]);
+
+
   // const [colaborador, setColaborador] = useState([crearColaborador()]);
 
   const [search, setSearch] = useState("");
@@ -101,10 +116,10 @@ const [openColumns, setOpenColumns] = useState(false);
   });
 
   const [faenaData, setFaenaData] = useState({
-    run_responsable: "",
-    nombre_responsable: "",
+    rut: "",
+    nombre: "",
     acreditado: "",
-    cargo_acreditado: "",
+    cargo: "",
     empresa_acreditadora: "",
     fuerza_de_trabajo: "",
   });
@@ -174,7 +189,7 @@ const [openColumns, setOpenColumns] = useState(false);
     setLoading(true);
 
     const { data, error } = await supabase
-      .from("v_reportes_resumen")
+      .from("v_reportes_resumen2")
       .select("*")
       .order("reporte_id", { ascending: false });
       
@@ -182,28 +197,30 @@ const [openColumns, setOpenColumns] = useState(false);
       setLoading(false);
     }
 
-    const reportesFiltrados = reportes.filter((r) => {
-      const searchMatch =
-        search === "" ||
-        Object.values(r)
+    const reportesFiltrados = !user
+  ? []
+  : reportes
+      .filter((r) => {
+        if (user.rol === "admin") return true;
+
+        return r.username === user.username;
+      })
+
+      .filter((r) => {
+        if (!search) return true;
+
+        return Object.values(r)
           .join(" ")
           .toLowerCase()
           .includes(search.toLowerCase());
+      });
+useEffect(() => {
+  if (reportes.length > 0) {
+    console.log("Reporte ejemplo:", reportes[0]);
+  }
+}, [reportes]);
 
-      const empresaMatch =
-        !filters.empresa ||
-        r.nombre_empresa?.toLowerCase().includes(filters.empresa.toLowerCase());
 
-      const regionMatch =
-        !filters.region ||
-        r.region?.toLowerCase().includes(filters.region.toLowerCase());
-
-      const actividadMatch =
-        !filters.actividad ||
-        r.tipo_actividad?.toLowerCase().includes(filters.actividad.toLowerCase());
-
-      return searchMatch && empresaMatch && regionMatch && actividadMatch;
-    });
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -360,6 +377,30 @@ const [openColumns, setOpenColumns] = useState(false);
         }
       }
 
+if (template.antecedentes_colaboradores) {
+  const colaboradoresValidos = colaboradores.filter(
+    c => c.rut_colaborador && c.rut_colaborador.trim() !== ""
+  );
+
+  if (colaboradoresValidos.length > 0) {
+    const { error } = await supabase
+      .from("colaboradores_ids")
+      .insert(
+        colaboradoresValidos.map(c => ({
+          reporte_id: reporte.id,
+          rut_colaborador: c.rut_colaborador,
+          nombre_colaborador: c.nombre_colaborador,
+          cargo_colaborador: c.cargo_colaborador,
+          acreditado_colaborador: c.acreditado_colaborador,
+          empresa_colaborador: c.empresa_colaborador
+        }))
+      );
+
+    if (error) throw error;
+  }
+}
+
+
     }
 
 
@@ -369,10 +410,10 @@ const [openColumns, setOpenColumns] = useState(false);
       setInspeccionData({ fecha_ids: "", hora_ids: "", division: "" , hora_inicio_faena: "" , hora_termino_faena: "" , auditoria_inicio: "" });
       setEmpresaData({ rut_empresa: "",
     nombre_empresa: "",});
-      setFaenaData({ run_responsable: "",
-    nombre_responsable: "",
+      setFaenaData({ rut: "",
+    nombre: "",
     acreditado: "",
-    cargo_acreditado: "",
+    cargo: "",
     empresa_acreditadora: "",
     fuerza_de_trabajo: "",});
       setActividadData({ tipo_actividad: "",
@@ -400,6 +441,14 @@ const [openColumns, setOpenColumns] = useState(false);
     tipo_evidencia_cierre:"",
     e_documental_cierre_hallazgo:"",
     e_fotografica_cierre_hallazgo:"", }]);
+
+    setColaboradores([{
+      rut_colaborador:"",
+      nombre_colaborador:"",
+      cargo_colaborador:"",
+      acreditado_colaborador:"",
+      empresa_colaborador:"",
+    }])
 
     // setColaborador({ rut: "",
     //   acreditado_colaborador: "",
@@ -559,6 +608,7 @@ const [openColumns, setOpenColumns] = useState(false);
                 antecedentes_actividad: "Antecedentes de Actividad",
                 antecedentes_ubicacion: "Antecedentes de Ubicación",
                 antecedentes_hallazgos: "Antecedentes de Hallazgos",
+                antecedentes_colaboradores: "Antecedentes de Colaboradores",
               };
 
               return (
@@ -566,12 +616,18 @@ const [openColumns, setOpenColumns] = useState(false);
                   key={key}
                   title={titles[key]}
                   index={index}
+                  defaultOpen={index === 0}
                 >
                   <Component
                     {...(key === "antecedentes_hallazgos"
                       ? {
                           hallazgos,
                           setHallazgos,
+                        }
+                      : key === "antecedentes_colaboradores"
+                      ? {
+                          colaboradores,
+                          setColaboradores,
                         }
                       : {
                           data:
@@ -590,6 +646,7 @@ const [openColumns, setOpenColumns] = useState(false);
                             setUbicacionData,
                         })}
                   />
+
                 </FormSection>
               );
             })}
@@ -618,28 +675,10 @@ const [openColumns, setOpenColumns] = useState(false);
 const Container = styled.div`
   min-height: 100vh;
   background: #ffffff;
-  padding-left: 72px;
   font-family: "Poppins", sans-serif;
 
   @media (max-width: 1024px) {
     padding-left: 0; 
-  }
-
-  .header-home {
-    position: relative;
-    margin-left: -72px;   
-    padding-left: 72px;   
-    background-color: rgb(236, 238, 248);
-    color: #53eb67;
-    text-align: center;
-    font-size: 2rem;
-    font-weight: 600;
-    padding-top: 20px;
-    padding-bottom: 20px;
-
-    span {
-      color: #00ffc3;
-    }
   }
 
   .btn-crear {
@@ -648,26 +687,7 @@ const Container = styled.div`
     right: 30px;
     z-index: 100;
 
-    button {
-      background: linear-gradient(90deg, #1c576e, #15e47c);
-      border: none;
-      padding: 14px 28px;
-      border-radius: 30px;
-      color: #002b36;
-      font-size: 1rem;
-      cursor: pointer;
-      font-weight: 600;
-      box-shadow: 0 10px 25px rgba(0,0,0,.2);
-
-      &:hover {
-        transform: translateY(-2px);
-      }
-    }
-  }
-
-  .btnexcel{
-    display: flex;
-
+    
   }
 `;
 
@@ -748,7 +768,6 @@ const FabCrear = styled.button`
 `;
 
 const TableSection = styled.section`
-  padding: 30px;
 
   @media (max-width: 768px) {
     padding: 16px;

@@ -4,7 +4,7 @@ import {
   Login,
   ProtectedRoute,
   UserAuth,
-  Dates,
+  Profile,
   Formulario,
   Reporte
 } from "../index";
@@ -16,18 +16,16 @@ export function MyRoutes() {
 
   return (
     <Routes>
-      {/* 🔒 Rutas protegidas */}
       <Route element={<ProtectedRoute user={user} redirectTo="/login" />}>
-        {/* 🧱 Layout con Sidebar */}
+
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/formulario" element={<Formulario />} />
           <Route path="/reporte" element={<Reporte />} />
-          <Route path="/dates" element={<Dates />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
       </Route>
 
-      {/* 🌍 Rutas públicas */}
       <Route path="/login" element={<Login />} />
     </Routes>
   );

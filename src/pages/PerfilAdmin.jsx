@@ -1,5 +1,5 @@
 import {PerfilAdminTemplate} from "../index"
-export function Dates(){
+export function Profile(){
     return (
         <PerfilAdminTemplate/>
 

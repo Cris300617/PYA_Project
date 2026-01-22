@@ -1,156 +1,225 @@
+import { useEffect, useState } from "react";
 import styled from "styled-components";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { supabase } from "../../../supabase/supabase.config";
 
 export function AntecedentesResponsableFaena({ data, setData }) {
+  const [query, setQuery] = useState("");
+  const [sugerencias, setSugerencias] = useState([]);
+  const [cargos, setCargos] = useState([]);
+  const [personaSeleccionada, setPersonaSeleccionada] = useState(false);
+  const [cargoSeleccionado, setCargoSeleccionado] = useState(false);
+
+ 
+  useEffect(() => {
+    if (query.length < 2 || personaSeleccionada) {
+      setSugerencias([]);
+      return;
+    }
+
+    const buscar = async () => {
+      const { data, error } = await supabase
+        .from("colaboradores")
+        .select("rut, nombre")
+        .ilike("nombre", `%${query}%`)
+        .limit(50);
+
+      if (!error && data) {
+        const unicos = Object.values(
+          data.reduce((acc, cur) => {
+            acc[cur.rut] = cur;
+            return acc;
+          }, {})
+        );
+        setSugerencias(unicos);
+      }
+    };
+
+    buscar();
+  }, [query, personaSeleccionada]);
+
+
+  const seleccionarPersona = async (persona) => {
+    setPersonaSeleccionada(true);
+    setQuery(persona.nombre);
+    setSugerencias([]);
+
+    setData({
+      ...data,
+      nombre_responsable: persona.nombre,
+      run_responsable: persona.rut,
+      cargo_acreditado: "",
+      acreditado: "",
+      empresa_acreditadora: "",
+    });
+
+    const { data: cargosData } = await supabase
+      .from("colaboradores")
+      .select("cargo")
+      .eq("rut", persona.rut);
+
+    const cargosUnicos = [...new Set(cargosData.map((c) => c.cargo))];
+    setCargos(cargosUnicos);
+  };
+
+
+  const seleccionarCargo = async (cargo) => {
+    setCargoSeleccionado(true);
+
+    const { data: info } = await supabase
+      .from("colaboradores")
+      .select("acreditado, empresa_acreditadora")
+      .eq("rut", data.run_responsable)
+      .eq("cargo", cargo)
+      .single();
+
+    setData((prev) => ({
+      ...prev,
+      cargo_acreditado: cargo,
+      acreditado: info?.acreditado ? "Si" : "No",
+      empresa_acreditadora: info?.empresa_acreditadora || "",
+    }));
+  };
+
   return (
     <Container>
       <section className="box">
-
-        <div className="field">
-          <label>RUT Responsable</label>
-          <input
-            type="text"
-            placeholder="RUT Responsable"
-            value={data.run_responsable || ""}
-            onChange={(e) =>
-              setData({ ...data, run_responsable: e.target.value })
-            }
-          />
-        </div>
-
-        <div className="field">
+        <div className="field autocomplete">
           <label>Nombre Responsable</label>
           <input
             type="text"
-            placeholder="Nombre Responsable"
-            value={data.nombre_responsable || ""}
-            onChange={(e) =>
-              setData({ ...data, nombre_responsable: e.target.value })
-            }
+            placeholder="Buscar responsable..."
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPersonaSeleccionada(false);
+              setCargoSeleccionado(false);
+            }}
           />
+
+          {sugerencias.length > 0 && (
+            <ul className="suggestions">
+              {sugerencias.map((s) => (
+                <li key={s.rut} onClick={() => seleccionarPersona(s)}>
+                  <strong>{s.nombre}</strong>
+                  <span>{s.rut}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
-        <div className="field">
-          <label>Persona Acreditada</label>
-          <input
-            type="text"
-            placeholder="Persona Acreditada"
-            value={data.acreditado || ""}
-            onChange={(e) =>
-              setData({ ...data, acreditado: e.target.value })
-            }
-          />
-        </div>
+        {personaSeleccionada && (
+          <div className="field">
+            <label>Cargo Acreditado</label>
+            <select
+              value={data.cargo_acreditado || ""}
+              onChange={(e) => seleccionarCargo(e.target.value)}
+            >
+              <option value="">Seleccionar cargo</option>
+              {cargos.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-        <div className="field">
-          <label>Cargo Acreditado</label>
-          <input
-            type="text"
-            placeholder="Cargo Acreditado"
-            value={data.cargo_acreditado || ""}
-            onChange={(e) =>
-              setData({ ...data, cargo_acreditado: e.target.value })
-            }
-          />
-        </div>
+        {cargoSeleccionado && (
+          <>
+            <div className="field">
+              <label>RUT Responsable</label>
+              <input value={data.run_responsable || ""} disabled />
+            </div>
 
-        <div className="field">
-          <label>Empresa Acreditado</label>
-          <input
-            type="text"
-            placeholder="Empresa Acreditado"
-            value={data.empresa_acreditadora || ""}
-            onChange={(e) =>
-              setData({ ...data, empresa_acreditadora: e.target.value })
-            }
-          />
-        </div>
+            <div className="field">
+              <label>Persona Acreditada</label>
+              <input value={data.acreditado || ""} disabled />
+            </div>
 
-        <div className="field">
-          <label>Fuerza de Trabajo</label>
-          <input
-            type="text"
-            placeholder="Fuerza de Trabajo"
-            value={data.fuerza_de_trabajo || ""}
-            onChange={(e) =>
-              setData({ ...data, fuerza_de_trabajo: e.target.value })
-            }
-          />
-        </div>
+            <div className="field">
+              <label>Empresa Acreditadora</label>
+              <input value={data.empresa_acreditadora || ""} disabled />
+            </div>
 
+            <div className="field">
+              <label>Fuerza de Trabajo</label>
+              <input
+                type="text"
+                placeholder="Fuerza de trabajo"
+                value={data.fuerza_de_trabajo || ""}
+                onChange={(e) =>
+                  setData({ ...data, fuerza_de_trabajo: e.target.value })
+                }
+              />
+            </div>
+          </>
+        )}
       </section>
     </Container>
   );
 }
 
+
 const Container = styled.div`
-  width: 100%; 
-  
+  width: 100%;
 
   .box {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(240px, 1fr)); 
-  column-gap: 20px;
-  row-gap: 16px;
-}
-
+    display: grid;
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+    column-gap: 50px;
+    row-gap: 16px;
+  }
 
   .field {
     display: flex;
     flex-direction: column;
-    gap: 6px; 
+    gap: 6px;
+    position: relative;
   }
 
   input,
   select {
-    width: 100%; 
-    max-width: 240px; 
+    max-width: 240px;
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #cbd5e1;
     font-size: 0.9rem;
-    background: #fff;
-    box-sizing: border-box;
+    
   }
-
-  input:focus {
-    outline: none;
-    border-color: #15e47c;
-    box-shadow: 0 0 0 2px rgba(21, 228, 124, 0.2);
-  }
-
-  select:focus {
-    outline: none;
-    border-color: #15e47c;
-    box-shadow: 0 0 0 2px rgba(21, 228, 124, 0.2);
-  }
-
 
   label {
     font-size: 0.8rem;
     font-weight: 600;
     color: #475569;
-    margin-bottom: 5px;
   }
 
-    @media (max-width: 1024px) {
-    .box {
-      grid-template-columns: 1fr;
-    }
+  .suggestions {
+    color: black;
+    position: absolute;
+    top: 100%;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    width: 100%;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 20;
   }
 
+  .suggestions li {
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+  }
 
-  @media (max-width: 640px) {
-    .box {
-      gap: 14px;
-    }
+  .suggestions li:hover {
+    background: #f1f5f9;
+  }
 
-    input {
-      font-size: 0.85rem;
-      padding: 11px 12px;
-    }
+  .suggestions span {
+    font-size: 0.75rem;
+    color: #64748b;
   }
 `;
-
-
