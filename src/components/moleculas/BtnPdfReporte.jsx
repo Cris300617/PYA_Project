@@ -12,7 +12,7 @@ export function BtnPdfReporte({ reporteId }) {
     const { data, error } = await supabase
       .from("v_registro_completo") 
       .select("*")
-      .eq("reporte_id", reporteId)
+      .eq("reporte_id", reporteId) 
       .single();
 
     if (error || !data) {

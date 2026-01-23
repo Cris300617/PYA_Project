@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { Sidebar,FormSection, AntecedentesObra, AntecedentesInspeccion, AntecedentesActividad, AntecedentesColaboradores, AntecedentesEmpresa, AntecedentesHallazgos, AntecedentesResponsableFaena, AntecedentesUbicacion, Btnexcel, BtnPdfReporte } from "../../index";
 import { supabase } from "../../supabase/supabase.config";
 import image from "./pya.png";
-import * as XLSX from 'xlsx';
 
 
 const componentMap = {
@@ -65,6 +64,7 @@ export function ReporteTemplate() {
   const [hallazgos, setHallazgos] = useState([crearHallazgo()]);
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
+  const [columnas, setColumnas] = useState([]);
   const [colaboradores, setColaboradores] = useState([
   crearColaborador(),
 ]);
@@ -74,14 +74,9 @@ export function ReporteTemplate() {
 
   const [search, setSearch] = useState("");
 
-  const [filters, setFilters] = useState({
-    empresa: "",
-    region: "",
-    actividad: "",
-  });
-
   const [visibleColumns, setVisibleColumns] = useState({
-  id: true,
+  reporte_id: true,
+  record_number: true,
   tipo_obra: true,
   codigo_obra: true,
   fecha_ids: true,
@@ -90,6 +85,7 @@ export function ReporteTemplate() {
   actividad: true,
   responsable: true,
   latitud: true,
+  
 });
 
 const [openColumns, setOpenColumns] = useState(false);
@@ -189,9 +185,9 @@ const [openColumns, setOpenColumns] = useState(false);
     setLoading(true);
 
     const { data, error } = await supabase
-      .from("v_reportes_resumen2")
+      .from("v_registro_completo")
       .select("*")
-      .order("reporte_id", { ascending: false });
+      .order("record_number", { ascending: true });
       
       if (!error) setReportes(data);
       setLoading(false);
@@ -214,11 +210,6 @@ const [openColumns, setOpenColumns] = useState(false);
           .toLowerCase()
           .includes(search.toLowerCase());
       });
-useEffect(() => {
-  if (reportes.length > 0) {
-    console.log("Reporte ejemplo:", reportes[0]);
-  }
-}, [reportes]);
 
 
 
@@ -466,6 +457,37 @@ if (template.antecedentes_colaboradores) {
     }
   }
 
+function renderCell(value) {
+  if (value === null || value === undefined) return "-";
+
+  if (typeof value === "string" || typeof value === "number") {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return `${value.length} ítems`;
+  }
+
+  if (typeof value === "object") {
+    return "Ver detalle";
+  }
+
+  return "-";
+}
+
+
+useEffect(() => {
+  if (reportes.length > 0) {
+    const keys = Object.keys(reportes[0]);
+    setColumnas(keys);
+  }
+}, [reportes]);
+
+
+const columnasVisibles = columnas.filter(
+  col => visibleColumns[col] !== false
+);
+
 
   return (
     <Container>
@@ -539,38 +561,31 @@ if (template.antecedentes_colaboradores) {
       <table>
         <thead>
           <tr>
-            {visibleColumns.id && <th>ID</th>}
-            {visibleColumns.tipo_obra && <th>Tipo Obra</th>}
-            {visibleColumns.codigo_obra && <th>Código Obra</th>}
-            {visibleColumns.fecha_ids && <th>Fecha IDS</th>}
-            {visibleColumns.empresa && <th>Empresa</th>}
-            {visibleColumns.region && <th>Región</th>}
-            {visibleColumns.actividad && <th>Actividad</th>}
-            {visibleColumns.responsable && <th>Responsable</th>}
-            {visibleColumns.latitud && <th>Latitud</th>}
+            {columnasVisibles.map(col => (
+              <th key={col}>
+                {col.replace(/_/g, " ")}
+              </th>
+            ))}
             <th>PDF</th>
           </tr>
         </thead>
 
         <tbody>
-          {reportesFiltrados.map((r) => (
-            <tr key={r.reporte_id}>
-              {visibleColumns.id && <td>{r.reporte_id}</td>}
-              {visibleColumns.tipo_obra && <td>{r.tipo_obra}</td>}
-              {visibleColumns.codigo_obra && <td>{r.codigo_obra}</td>}
-              {visibleColumns.fecha_ids && <td>{r.fecha_ids}</td>}
-              {visibleColumns.empresa && <td>{r.nombre_empresa}</td>}
-              {visibleColumns.region && <td>{r.region}</td>}
-              {visibleColumns.actividad && <td>{r.tipo_actividad}</td>}
-              {visibleColumns.responsable && <td>{r.nombre_responsable}</td>}
-              {visibleColumns.latitud && <td>{r.geo_latitud}</td>}
-              <td>
-                <BtnPdfReporte reporteId={r.reporte_id} />
-              </td>
-            </tr>
-          ))}
+  {reportesFiltrados.map((r) => (
+    <tr key={r.record_number}>
+      {columnasVisibles.map(col => (
+        <td key={`${r.record_number}-${col}`}>
+        {renderCell(r[col])}
+      </td>
 
-        </tbody>
+      ))}
+      <td>
+        <BtnPdfReporte reporteId={r.reporte_id} />
+      </td>
+    </tr>
+  ))}
+</tbody>
+
       </table>
     )}
   </TableWrapper>
@@ -931,11 +946,12 @@ const Modal = styled.div`
 
 const TableWrapper = styled.div`
   padding: 30px;
+  width: 100%;
+  max-width:1600px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 
   table {
-    width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     background: #ffffff;

@@ -20,7 +20,6 @@ export function Btnexcel() {
   useEffect(() => {
     cargarDatasets();
 
-    // cerrar dropdown al clickear fuera
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpen(false);
@@ -34,7 +33,7 @@ export function Btnexcel() {
   async function cargarDatasets() {
     setLoading(true);
 
-    const [resumen, obra, empresa, actividad, ubicacion, inspeccion, faena] = await Promise.all([
+    const [resumen, obra, empresa, actividad, ubicacion, inspeccion, faena, hallazgos] = await Promise.all([
       supabase.from("v_registro_completo").select("*"),
       supabase.from("v_antecedentes_obra").select("*"),
       supabase.from("v_antecedentes_empresa").select("*"),
@@ -42,6 +41,7 @@ export function Btnexcel() {
       supabase.from("v_antecedentes_ubicacion").select("*"),
       supabase.from("v_antecedentes_inspeccion").select("*"),
       supabase.from("v_antecedentes_faena").select("*"),
+      supabase.from("info_hallazgos").select("*"),
     ]);
 
     setDatasets({
@@ -52,6 +52,7 @@ export function Btnexcel() {
       ubicacion: ubicacion.data || [],
       inspeccion: inspeccion.data || [],
       faena: faena.data || [],
+      hallazgos: hallazgos.data || [],
     });
 
     setLoading(false);
@@ -97,11 +98,14 @@ export function Btnexcel() {
       label: "Antecedentes de R.Faena",
       icon: <FaHardHat size={12} />,
     },
+    hallazgos: {
+      label: "Antecedentes de Hallazgos",
+      icon: <FaHardHat size={12} />,
+    },
   };
 
   return (
     <Toolbar>
-      {/* ===== Dropdown selector ===== */}
       <Dropdown ref={dropdownRef}>
         <DropdownButton onClick={() => setOpen(!open)}>
           <div className="label">
@@ -134,7 +138,6 @@ export function Btnexcel() {
         )}
       </Dropdown>
 
-      {/* ===== Botón Excel ===== */}
       <ExcelButton
         onClick={exportarExcel}
         disabled={!datasets[vistaSeleccionada]?.length || loading}
@@ -159,12 +162,10 @@ const Toolbar = styled.div`
   gap: 16px;
 `;
 
-/* ===== Dropdown ===== */
 const Dropdown = styled.div`
   position: relative;
 `;
 
-/* Botón principal */
 const DropdownButton = styled.button`
   display: flex;
   align-items: center;
@@ -204,7 +205,6 @@ const DropdownButton = styled.button`
   
 `;
 
-/* Menú desplegable */
 const DropdownMenu = styled.div`
   position: absolute;
   top: calc(100% + 8px);
@@ -221,7 +221,6 @@ const DropdownMenu = styled.div`
   z-index: 50;
 `;
 
-/* Item */
 const DropdownItem = styled.button`
   width: 100%;
   padding: 12px 14px;
