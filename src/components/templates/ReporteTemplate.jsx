@@ -1,21 +1,20 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Sidebar,FormSection, AntecedentesObra, AntecedentesInspeccion, AntecedentesActividad, AntecedentesColaboradores, AntecedentesEmpresa, AntecedentesHallazgos, AntecedentesResponsableFaena, AntecedentesUbicacion, Btnexcel, BtnPdfReporte } from "../../index";
+import { Sidebar,FormSection, AntecedentesObra, AntecedentesInspeccion, AntecedentesActividad, AntecedentesColaboradores, AntecedentesEmpresa, AntecedentesHallazgos, AntecedentesResponsableFaena, AntecedentesUbicacion, Btnexcel, BtnPdfReporte, BtnCierreReporte } from "../../index";
 import { supabase } from "../../supabase/supabase.config";
 import image from "./pya.png";
 
 
 const componentMap = {
-  antecedentes_obra: AntecedentesObra,
   antecedentes_inspeccion: AntecedentesInspeccion,
-  
-  antecedentes_empresa: AntecedentesEmpresa,
-  
-  antecedentes_responsable_faena: AntecedentesResponsableFaena,
-  antecedentes_actividad: AntecedentesActividad,
   antecedentes_ubicacion: AntecedentesUbicacion,
-  antecedentes_hallazgos: AntecedentesHallazgos,
+  antecedentes_obra: AntecedentesObra,
+  antecedentes_empresa: AntecedentesEmpresa,
+  antecedentes_responsable_faena: AntecedentesResponsableFaena,
   antecedentes_colaboradores: AntecedentesColaboradores,
+  antecedentes_actividad: AntecedentesActividad,
+  antecedentes_hallazgos: AntecedentesHallazgos,
+  
   
   
 };
@@ -76,15 +75,37 @@ export function ReporteTemplate() {
 
   const [visibleColumns, setVisibleColumns] = useState({
   reporte_id: true,
+  username: true,
   record_number: true,
   tipo_obra: true,
   codigo_obra: true,
   fecha_ids: true,
-  empresa: true,
+  hora_ids: true,
+  division: true,
+  hora_inicio_faena: true,
+  hora_termino_faena: true,
+  auditoria_inicio: true,
+  rut_empresa: true,
+  nombre_empresa: true,
   region: true,
-  actividad: true,
-  responsable: true,
-  latitud: true,
+  zona: true,
+  delegacion: true,
+  direccion: true,
+  geo_latitud: true,
+  geo_longitud: true,
+  geo_altitud: true,
+  tipo_actividad: true,
+  sociedad_cge: true,
+  emergencia: true,
+  ids_efectiva: true,
+  descripcion_actividad: true,
+  ids_con_hallazgo: true,
+  run_responsable: true,
+  nombre_responsable: true,
+  acreditado: true,
+  cargo_acreditado: true,
+  empresa_acreditadora: true,
+  fuerza_de_trabajo: true,
   
 });
 
@@ -125,7 +146,7 @@ const [openColumns, setOpenColumns] = useState(false);
     sociedad_cge: "",
     emergencia: "",
     ids_efectiva: "",
-    descripcion: "",
+    descripcion_actividad: "",
     ids_con_hallazgo: "",
   });
 
@@ -273,7 +294,7 @@ const [openColumns, setOpenColumns] = useState(false);
               sociedad_cge: actividadData.sociedad_cge || null,
               emergencia: actividadData.emergencia || null,
               ids_efectiva: actividadData.ids_efectiva || null,
-              descripcion: actividadData.descripcion || null,
+              descripcion_actividad: actividadData.descripcion_actividad || null,
               ids_con_hallazgo: actividadData.ids_con_hallazgo || null,
             },
           ]);
@@ -367,8 +388,9 @@ const [openColumns, setOpenColumns] = useState(false);
           throw error;
         }
       }
+    }
 
-if (template.antecedentes_colaboradores) {
+    if (template.antecedentes_colaboradores) {
   const colaboradoresValidos = colaboradores.filter(
     c => c.rut_colaborador && c.rut_colaborador.trim() !== ""
   );
@@ -392,9 +414,6 @@ if (template.antecedentes_colaboradores) {
 }
 
 
-    }
-
-
 
       setOpen(false);
       setObraData({ tipo_obra: "", codigo_obra: "" });
@@ -411,7 +430,7 @@ if (template.antecedentes_colaboradores) {
     sociedad_cge: "",
     emergencia: "",
     ids_efectiva: "",
-    descripcion: "",
+    descripcion_actividad: "",
     ids_con_hallazgo: "",});
       setUbicacionData({ region: "",
     zona: "",
@@ -561,27 +580,30 @@ const columnasVisibles = columnas.filter(
       <table>
         <thead>
           <tr>
+            <th>Status</th>
+            <th>PDF</th>
             {columnasVisibles.map(col => (
               <th key={col}>
                 {col.replace(/_/g, " ")}
               </th>
             ))}
-            <th>PDF</th>
           </tr>
         </thead>
 
         <tbody>
   {reportesFiltrados.map((r) => (
     <tr key={r.record_number}>
+      <td><BtnCierreReporte/></td>
+      <td>
+        <BtnPdfReporte reporteId={r.reporte_id} />
+      </td>
       {columnasVisibles.map(col => (
         <td key={`${r.record_number}-${col}`}>
         {renderCell(r[col])}
       </td>
 
       ))}
-      <td>
-        <BtnPdfReporte reporteId={r.reporte_id} />
-      </td>
+      
     </tr>
   ))}
 </tbody>
@@ -602,16 +624,20 @@ const columnasVisibles = columnas.filter(
       {open && (
         <Modal>
           <div className="modal">
-            
-              <img src={image} alt="logo" />
-            
+            <img src={image} alt="logo" />
 
             <h3>Formulario de Reporte</h3>
-            
 
-            {/* Render dinámico según template*/}
+            {/* Render dinámico según template */}
             {Object.keys(componentMap).map((key, index) => {
               if (!template[key]) return null;
+
+              if (
+                key === "antecedentes_hallazgos" &&
+                actividadData?.ids_con_hallazgo !== "Si"
+              ) {
+                return null;
+              }
 
               const Component = componentMap[key];
 
@@ -619,7 +645,8 @@ const columnasVisibles = columnas.filter(
                 antecedentes_obra: "Antecedentes de la Obra",
                 antecedentes_inspeccion: "Antecedentes de Inspección",
                 antecedentes_empresa: "Antecedentes de la Empresa",
-                antecedentes_responsable_faena: "Antecedentes del Responsable de Faena y/o Actividad",
+                antecedentes_responsable_faena:
+                  "Antecedentes del Responsable de Faena y/o Actividad",
                 antecedentes_actividad: "Antecedentes de Actividad",
                 antecedentes_ubicacion: "Antecedentes de Ubicación",
                 antecedentes_hallazgos: "Antecedentes de Hallazgos",
@@ -646,27 +673,34 @@ const columnasVisibles = columnas.filter(
                         }
                       : {
                           data:
-                            key === "antecedentes_obra" ? obraData :
-                            key === "antecedentes_inspeccion" ? inspeccionData :
-                            key === "antecedentes_empresa" ? empresaData :
-                            key === "antecedentes_responsable_faena" ? faenaData :
-                            key === "antecedentes_actividad" ? actividadData :
-                            ubicacionData,
+                            key === "antecedentes_obra"
+                              ? obraData
+                              : key === "antecedentes_inspeccion"
+                              ? inspeccionData
+                              : key === "antecedentes_empresa"
+                              ? empresaData
+                              : key === "antecedentes_responsable_faena"
+                              ? faenaData
+                              : key === "antecedentes_actividad"
+                              ? actividadData
+                              : ubicacionData,
                           setData:
-                            key === "antecedentes_obra" ? setObraData :
-                            key === "antecedentes_inspeccion" ? setInspeccionData :
-                            key === "antecedentes_empresa" ? setEmpresaData :
-                            key === "antecedentes_responsable_faena" ? setFaenaData :
-                            key === "antecedentes_actividad" ? setActividadData :
-                            setUbicacionData,
+                            key === "antecedentes_obra"
+                              ? setObraData
+                              : key === "antecedentes_inspeccion"
+                              ? setInspeccionData
+                              : key === "antecedentes_empresa"
+                              ? setEmpresaData
+                              : key === "antecedentes_responsable_faena"
+                              ? setFaenaData
+                              : key === "antecedentes_actividad"
+                              ? setActividadData
+                              : setUbicacionData,
                         })}
                   />
-
                 </FormSection>
               );
             })}
-
-
 
             <div className="actions">
               <button className="cancel" onClick={() => setOpen(false)}>
@@ -678,6 +712,7 @@ const columnasVisibles = columnas.filter(
             </div>
           </div>
         </Modal>
+
       )}
           </>
         )}
@@ -948,6 +983,7 @@ const TableWrapper = styled.div`
   padding: 30px;
   width: 100%;
   max-width:1600px;
+  max-height: 600px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 

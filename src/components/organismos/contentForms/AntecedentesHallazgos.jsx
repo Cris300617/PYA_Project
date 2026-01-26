@@ -1,14 +1,17 @@
 import styled from "styled-components";
 
 export function AntecedentesHallazgos({ hallazgos, setHallazgos }) {
+
+  const controlAsociado = ['Vehículos, Camiones, Maquinarias', 'Condiciones Básicas de Trabajo', 'Delimitación de Zona de Trabajo', 'Documentación en Terreno', 'Elementos de Protección Personal', 'Equipos y Herramientas', 'Equipos Dielectricos', 'Manejo de Sustancias y Residuos', 'Condiciones Externas', 'Línea Roja - Falta Administrativa', 'Línea Roja - Actividad', 'Trabajos en Altura', 'Trabajos con Tensión', 'Espacios Confinados', 'Manipulación de Carga', 'Excavaciones', 'Condiciones Climáticas', '5 Reglas de Oro'];
+
   const agregarHallazgo = () => {
     setHallazgos([
       ...hallazgos,
       {
         id: crypto.randomUUID(),
         descripcion: "",
-        estado: "Pendiente",
-        potencializacion: "",
+        estado: "Abierto",
+        paralizacion: "",
         potencialidad: "",
         tipo_hallazgo: "",
         evidencia: "",
@@ -38,7 +41,7 @@ export function AntecedentesHallazgos({ hallazgos, setHallazgos }) {
   return (
     <Container>
       {hallazgos.map((h, index) => (
-        <div key={h.id} className="hallazgo">
+        <div key={`${h.id}-${index}`} className="hallazgo">
           <div className="header">
             <h4>Hallazgo #{index + 1}</h4>
             {hallazgos.length > 1 && (
@@ -71,43 +74,55 @@ export function AntecedentesHallazgos({ hallazgos, setHallazgos }) {
                   actualizarCampo(h.id, "estado", e.target.value)
                 }
               >
-                <option>Pendiente</option>
-                <option>En revisión</option>
-                <option>Corregido</option>
+                <option value="">Seleccionar Opcion</option>
+                <option>Abierto</option>
+                <option>Cerrado</option>
+                <option>RIS</option>
               </select>
             </div>
 
             <div>
               <label>Paralización</label>
-              <input
-                type="text"
+              <select
                 value={h.paralizacion}
                 onChange={(e) =>
                   actualizarCampo(h.id, "paralizacion", e.target.value)
                 }
-              />
+              >
+                <option value="">Seleccionar Opcion</option>
+                <option>Si</option>
+                <option>No</option>
+              </select>
             </div>
 
             <div>
-              <label>Potencializacion</label>
-              <input
-                type="text"
+              <label>Potencialidad</label>
+              <select
                 value={h.potencializacion}
                 onChange={(e) =>
                   actualizarCampo(h.id, "potencializacion", e.target.value)
                 }
-              />
+              >
+                <option value="">Seleccionar Opcion</option>
+                <option>Alta</option>
+                <option>Media</option>
+                <option>Baja</option>
+              </select>
             </div>
 
             <div>
               <label>Tipo Hallazgo</label>
-              <input
-                type="text"
+              <select
                 value={h.tipo_hallazgo}
                 onChange={(e) =>
                   actualizarCampo(h.id, "tipo_hallazgo", e.target.value)
                 }
-              />
+              >
+                <option value="">Seleccionar Opcion</option>
+                <option>Seguridad y Salud</option>
+                <option>Medio Ambiente</option>
+                <option>Linea Roja de Seguridad</option>
+              </select>
             </div>
 
             <div>
@@ -123,24 +138,33 @@ export function AntecedentesHallazgos({ hallazgos, setHallazgos }) {
 
             <div>
               <label>Clasificación</label>
-              <input
-                type="text"
+              <select
                 value={h.clasificacion}
                 onChange={(e) =>
                   actualizarCampo(h.id, "clasificacion", e.target.value)
                 }
-              />
+              >
+                <option value="">Seleccionar Opcion</option>
+                <option>Accion Subestandar</option>
+                <option>Condicion Subestandar</option>
+              </select>
             </div>
 
             <div>
               <label>Control Asociado</label>
-              <input
-                type="text"
+              <select
                 value={h.control_asociado}
                 onChange={(e) =>
                   actualizarCampo(h.id, "control_asociado", e.target.value)
                 }
-              />
+              >
+                <option value="">Seleccionar Opcion</option>
+                {controlAsociado.map((control) => (
+              <option key={control} value={control}>
+                {control}
+              </option>
+            ))}
+              </select>
             </div>
 
             <div>

@@ -1,41 +1,115 @@
 import styled from "styled-components";
-import "react-datepicker/dist/react-datepicker.css";
+import { useEffect, useRef, useState } from "react";
+import { supabase } from "../../../supabase/supabase.config";
 
 export function AntecedentesActividad({ data, setData }) {
+  const [query, setQuery] = useState("");
+  const [sugerencias, setSugerencias] = useState([]);
+  const [isFocused, setIsFocused] = useState(false);
+  const [tipoSeleccionado, setTipoSeleccionado] = useState(false);
+
+  const wrapperRef = useRef(null);
+
+  const sociedadCGE = ['CGE Dx - Distribución', 'CGE Sx - Servicios', 'CGE Tx - Transmisión', 'CGE Cx - Comercializadora'];
+
+  const buscarTipo = async (valor = "") => {
+    const { data, error } = await supabase
+      .from("tipo_actividad")
+      .select("tipo")
+      .ilike("tipo", `%${valor}%`)
+      .limit(30);
+
+    if (!error && data) {
+      setSugerencias(data);
+    }
+  };
+
+  useEffect(() => {
+    if (!isFocused || tipoSeleccionado) return;
+    buscarTipo(query);
+  }, [query, isFocused, tipoSeleccionado]);
+
+  const seleccionarTipo = (item) => {
+    setQuery(item.tipo);
+    setTipoSeleccionado(true);
+    setIsFocused(false);
+    setSugerencias([]);
+
+    setData({
+      ...data,
+      tipo_actividad: item.tipo, 
+    });
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setIsFocused(false);
+        setSugerencias([]);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <Container>
       <section className="box">
 
-        {/* Fila 1 */}
-        <div className="field">
+        <div className="field autocomplete" ref={wrapperRef}>
           <label>Tipo de Actividad</label>
+
           <input
             type="text"
             placeholder="Tipo de Actividad"
-            value={data.tipo_actividad || ""}
-            onChange={(e) =>
-              setData({ ...data, tipo_actividad: e.target.value })
-            }
+            value={query}
+            onFocus={() => {
+              setIsFocused(true);
+              buscarTipo("");
+            }}
+            onChange={(e) => {
+              setTipoSeleccionado(false);
+              setQuery(e.target.value);
+              setData({ ...data, tipo_actividad: e.target.value });
+            }}
           />
+
+          {isFocused && sugerencias.length > 0 && (
+            <ul className="suggestions">
+              {sugerencias.map((item) => (
+                <li
+                  key={item.tipo}
+                  onClick={() => seleccionarTipo(item)}
+                >
+                  {item.tipo}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <div className="field">
           <label>Sociedad CGE</label>
-          <input
-            type="text"
-            placeholder="Sociedad CGE"
+          <select
             value={data.sociedad_cge || ""}
             onChange={(e) =>
               setData({ ...data, sociedad_cge: e.target.value })
             }
-          />
+          >
+            <option value="">Selecciona una sociedad</option>
+            {sociedadCGE.map((sociedad) => (
+              <option key={sociedad} value={sociedad}>
+                {sociedad}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Fila 2 */}
         <div className="field">
           <label>Existe Alguna Emergencia</label>
           <select
-            value={data.emergencia}
+            value={data.emergencia || ""}
             onChange={(e) =>
               setData({ ...data, emergencia: e.target.value })
             }
@@ -49,7 +123,7 @@ export function AntecedentesActividad({ data, setData }) {
         <div className="field">
           <label>¿La IDS es Efectiva?</label>
           <select
-            value={data.ids_efectiva}
+            value={data.ids_efectiva || ""}
             onChange={(e) =>
               setData({ ...data, ids_efectiva: e.target.value })
             }
@@ -60,15 +134,12 @@ export function AntecedentesActividad({ data, setData }) {
           </select>
         </div>
 
-        {/* Fila 3 */}
         <div className="field">
-          <label>Descripcion</label>
+          <label>Descripción</label>
           <input
-            type="text"
-            placeholder="Descripción"
-            value={data.descripcion || ""}
+            value={data.descripcion_actividad || ""}
             onChange={(e) =>
-              setData({ ...data, descripcion: e.target.value })
+              setData({ ...data, descripcion_actividad: e.target.value })
             }
           />
         </div>
@@ -76,7 +147,7 @@ export function AntecedentesActividad({ data, setData }) {
         <div className="field">
           <label>¿La IDS posee hallazgos?</label>
           <select
-            value={data.ids_con_hallazgo}
+            value={data.ids_con_hallazgo || ""}
             onChange={(e) =>
               setData({ ...data, ids_con_hallazgo: e.target.value })
             }
@@ -91,6 +162,7 @@ export function AntecedentesActividad({ data, setData }) {
     </Container>
   );
 }
+
 
 const Container = styled.div`
   width: 100%; 
@@ -137,6 +209,36 @@ const Container = styled.div`
     color: #475569;
     margin-bottom: 5px;
   }
+
+  .autocomplete {
+    color: #555454;
+    position: relative;
+  }
+
+  .suggestions {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    list-style: none;
+    padding: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 50;
+  }
+
+  .suggestions li {
+    padding: 10px 12px;
+    cursor: pointer;
+  }
+
+  .suggestions li:hover {
+    background: #f1f5f9;
+  }
+
 
   @media (max-width: 1024px) {
     .box {

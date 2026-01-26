@@ -44,3 +44,4 @@ export * from './components/moleculas/Btnexcel';
 export * from './components/moleculas/BtnPdfReporte';
 export * from './services/adminUsers';
 export * from './components/organismos/Sidebar/DashboardLayout';
+export * from './components/moleculas/BtnCierreReporte';
