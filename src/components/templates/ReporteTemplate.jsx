@@ -526,8 +526,10 @@ const columnasVisibles = columnas.filter(
     <span>Listado general de inspecciones</span>
   </TitleGroup>
 
-
-  <Btnexcel />
+  <div className="pos-excel">
+    <Btnexcel />
+  </div>
+  
 </TableHeader>
 
 <TableControls>
@@ -726,9 +728,10 @@ const Container = styled.div`
   min-height: 100vh;
   background: #ffffff;
   font-family: "Poppins", sans-serif;
+  overflow-x: hidden; 
 
   @media (max-width: 1024px) {
-    padding-left: 0; 
+    padding-left: 0;
   }
 
   .btn-crear {
@@ -831,7 +834,13 @@ const TableHeader = styled.div`
   gap: 16px;
   flex-wrap: wrap;
 
-  @media (max-width: 640px) {
+  .pos-excel{
+    @media (max-width: 1900px) {
+    margin-right: 200px;
+  }
+  }
+
+  @media (max-width: 1024px) {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -897,8 +906,20 @@ const Modal = styled.div`
     flex-direction: column;
     gap: 24px;
 
-    @media (max-width: 1024px) {
-    max-width: 100%;
+     @media (max-width: 768px) {
+    .modal {
+      max-width: 100%;
+      height: 100vh;
+      max-height: 100vh;
+      border-radius: 0;
+      padding: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .modal {
+      padding: 16px;
+    }
   }
 
     img {
@@ -1045,11 +1066,24 @@ const TableWrapper = styled.div`
     border-bottom: none;
   }
 
+  @media (max-width: 1024px) {
+    table {
+      min-width: 1000px;
+    }
+  }
+
   @media (max-width: 768px) {
-    padding: 12px;
+    padding: 10px 0;
 
     table {
-      font-size: 0.85rem;
+      min-width: 900px;
+      font-size: 0.82rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    table {
+      min-width: 850px;
     }
   }
 `;
@@ -1059,6 +1093,7 @@ const FiltersBar = styled.div`
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  
 
   input {
     padding: 10px 14px;
@@ -1085,9 +1120,15 @@ const ColumnDropdown = styled.div`
     &:hover {
       background: #f8fafc;
     }
+
+    @media (max-width: 1900px) {
+
+      margin-right:200px;
+    }
   }
 
   .menu {
+    max-height: 400px;
     position: absolute;
     top: 120%;
     right: 0;
@@ -1097,7 +1138,8 @@ const ColumnDropdown = styled.div`
     padding: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,.15);
     z-index: 100;
-
+    
+  overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -1128,6 +1170,7 @@ const TableControls = styled.div`
   @media (max-width: 640px) {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
   }
 `;
 
@@ -1168,6 +1211,15 @@ const MainContent = styled.main`
   flex: 1;
   padding: 30px;
   position: relative;
+  max-width: 100vw;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px;
+  }
 `;
 
 
