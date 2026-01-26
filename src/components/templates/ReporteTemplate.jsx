@@ -729,6 +729,7 @@ const Container = styled.div`
   background: #ffffff;
   font-family: "Poppins", sans-serif;
   overflow-x: hidden; 
+  max-width: 100%;
 
   @media (max-width: 1024px) {
     padding-left: 0;

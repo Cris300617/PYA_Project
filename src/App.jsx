@@ -56,12 +56,12 @@ const Container = styled.main`
   .contentRouters {
     background-color: ${({ theme }) => theme.background};
     min-height: 100vh;
-    margin-left: 72px;
+    //margin-left: 72px;
   }
 
   @media ${Device.tablet} {
     .contentRouters {
-      margin-left: 72px;
+      //margin-left: 72px;
     }
     .contentMenu { 
       display: none; }
