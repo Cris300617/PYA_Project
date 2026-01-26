@@ -984,19 +984,18 @@ const Modal = styled.div`
     color: #064e3b;
   }
 
-  @media (max-width: 480px) {
-        flex-direction: column;
-      }
-}}
-
-@media (max-width: 768px) {
+  @media (max-width: 768px) {
+      max-width: 100%;
+      height: 100vh;
+      border-radius: 0;
       padding: 20px;
-      border-radius: 14px;
     }
 
     @media (max-width: 480px) {
       padding: 16px;
     }
+  }
+}
 
 `;
 
@@ -1066,24 +1065,24 @@ const TableWrapper = styled.div`
     border-bottom: none;
   }
 
-  @media (max-width: 1024px) {
+   @media (max-width: 1024px) {
     table {
-      min-width: 1000px;
+      font-size: 0.85rem;
     }
   }
 
   @media (max-width: 768px) {
-    padding: 10px 0;
-
+    padding: 10px;
     table {
-      min-width: 900px;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
+      min-width: 500px;
     }
   }
 
   @media (max-width: 480px) {
     table {
-      min-width: 850px;
+      font-size: 0.75rem;
+      min-width: 400px;
     }
   }
 `;
@@ -1138,8 +1137,7 @@ const ColumnDropdown = styled.div`
     padding: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,.15);
     z-index: 100;
-    
-  overflow-y: auto;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
