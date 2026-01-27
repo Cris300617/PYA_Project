@@ -1130,21 +1130,36 @@ const ColumnDropdown = styled.div`
   }
 
   .menu {
-    max-height: 400px;
-    position: absolute;
-    top: 120%;
-    right: 0;
-    min-width: 220px;
-    background: white;
-    border-radius: 14px;
-    padding: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,.15);
-    z-index: 100;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  position: absolute;
+  top: 120%;          
+  right: 0;           
+
+  min-width: 220px;
+  max-width: calc(100vw - 24px);
+
+  background: white;
+  border-radius: 14px;
+  padding: 12px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  z-index: 100;
+
+  overflow-y: auto;
+  max-height: 400px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  transform: translateX(0);
+
+  @media (max-width: 1900px) {
+
+      margin-right:200px;
+    }
+}
+
+
 
   label {
     display: flex;
