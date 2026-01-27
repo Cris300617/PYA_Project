@@ -59,9 +59,9 @@ const Container = styled.main`
     //margin-left: 72px;
   }
 
-  @media ${Device.tablet} {
+  @media ${Device.desktop} {
     .contentRouters {
-      //margin-left: 72px;
+      margin-left: 72px;
     }
     .contentMenu { 
       display: none; }

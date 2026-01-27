@@ -61,14 +61,15 @@ const [form, setForm] = useState({
 
   return (
       <Container>
+        <TableSection>
+          <TableHeader>
+            <TitleGroup>
+              <h2>Formularios</h2>
+              <span>Listado de formularios</span>
+            </TitleGroup>
 
-        <header className="header-home">
-          D-<span>Project</span>
-        </header>
-
-        <section className="head-forms">
-          <p className="title-forms">Mis formularios</p>
-        </section>
+          </TableHeader>
+          
         <section className="content-forms">
           <div className="table-layout">
 
@@ -188,6 +189,9 @@ const [form, setForm] = useState({
           
         )}
 
+        </TableSection>
+        
+
       </Container>
  
   );
@@ -197,7 +201,6 @@ const [form, setForm] = useState({
 const Container = styled.div`
   min-height: 100vh;
   background: #ffffff;
-  padding-left: 72px;
   font-family: "Poppins", sans-serif;
 
 
@@ -523,63 +526,56 @@ const Form = styled.form`
 
 `;
 
-const Modal = styled.div`
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
+const TitleGroup = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
+  flex-direction: column;
+  gap: 4px;
 
-  .modal {
-    background: white;
-    padding: 30px;
-    border-radius: 16px;
-    width: 400px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+  h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: 0.02em;
+    position: relative;
+    padding-left: 14px;
+  }
 
-    h3 {
-      text-align: center;
-      margin-bottom: 10px;
-      color: black;
-    }
+  h2::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 5px;
+    height: 70%;
+    border-radius: 4px;
+    background: linear-gradient(180deg, #15e47c, #1c576e);
+  }
 
-    .sub-txt{
-        color: #5a5555;
-    }
-
-    input {
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 0.95rem;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
-
-      button {
-        padding: 10px 18px;
-        border-radius: 20px;
-        border: none;
-        cursor: pointer;
-      }
-
-      .cancel {
-        background: #eee;
-      }
-
-      .create {
-        background: #4ac8a5;
-        color: white;
-      }
-    }
+  span {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 500;
   }
 `;
 
+const TableSection = styled.section`
+  padding: 16px;
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+`;
+
+const TableHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`;
 

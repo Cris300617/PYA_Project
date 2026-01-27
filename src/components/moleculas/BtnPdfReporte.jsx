@@ -3,16 +3,16 @@ import { FaFilePdf } from "react-icons/fa";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { supabase } from "../../supabase/supabase.config";
+import image from "./pya.png";
 
 export function BtnPdfReporte({ reporteId }) {
-
   const generarPDF = async () => {
     if (!reporteId) return;
 
     const { data, error } = await supabase
-      .from("v_registro_completo") 
+      .from("v_registro_completo2")
       .select("*")
-      .eq("reporte_id", reporteId) 
+      .eq("reporte_id", reporteId)
       .single();
 
     if (error || !data) {
@@ -22,39 +22,180 @@ export function BtnPdfReporte({ reporteId }) {
 
     const pdf = new jsPDF("p", "mm", "a4");
 
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+
+
+    const imgWidth = 60;
+    const imgHeight = 20;
+    const imgX = 14;
+    const imgY = 10;
+
+    pdf.addImage(image, "PNG", imgX, imgY, imgWidth, imgHeight);
+
+    const spaceAfterImage = 10;
+    const titleY = imgY + imgHeight + spaceAfterImage;
+
     pdf.setFontSize(16);
-    pdf.text("Reporte de Inspección", 14, 18);
-
-    pdf.setFontSize(11);
-    pdf.text(`Numero de Registro: ${data.record_number}`, 14, 28);
-
-    autoTable(pdf, {
-      startY: 36,
-      head: [["Campo", "Valor"]],
-      body: [
-        ["Tipo Obra", data.tipo_obra],
-        ["Código Obra", data.codigo_obra],
-        ["Fecha IDS", data.fecha_ids],
-        ["Empresa", data.nombre_empresa],
-        ["Región", data.region],
-        ["Actividad", data.tipo_actividad],
-        ["Responsable", data.nombre_responsable],
-      ],
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [28, 87, 110] },
+    pdf.text("Reporte de Inspección", pageWidth / 2, titleY, {
+      align: "center",
     });
 
-    if (data.hallazgos?.length) {
+    pdf.setFontSize(11);
+    pdf.text(
+      `Número de Registro: ${data.record_number}`,
+      14,
+      titleY + 10
+    );
+
+    let currentY = titleY + 20;
+
+
+    const addSectionTitle = (title) => {
+      if (currentY + 15 > pageHeight) {
+        pdf.addPage();
+        currentY = 20;
+      }
+
+      pdf.setFontSize(18);
+      pdf.text(title, pageWidth / 2, currentY, { align: "center" });
+      currentY += 6;
+    };
+
+    const tableConfig = {
+      styles: { fontSize: 9 },
+      columnStyles: { 0: { fontStyle: "bold" } },
+      headStyles: { fillColor: [28, 87, 110] },
+    };
+
+
+    addSectionTitle("Antecedentes de Inspección");
+    autoTable(pdf, {
+      startY: currentY,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["Fecha IDS", data.fecha_ids],
+        ["Hora IDS", data.hora_ids],
+        ["División", data.division],
+        ["Hora inicio faena", data.hora_inicio_faena],
+        ["Hora término faena", data.hora_termino_faena],
+        ["Auditoría de inicio", data.auditoria_inicio],
+      ],
+      ...tableConfig,
+    });
+
+    currentY = pdf.lastAutoTable.finalY + 16;
+
+    addSectionTitle("Antecedentes de Ubicación");
+    autoTable(pdf, {
+      startY: currentY,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["Región", data.region],
+        ["Zona", data.zona],
+        ["Delegación", data.delegacion],
+        ["Dirección", data.direccion],
+        ["Latitud", data.geo_latitud],
+        ["Longitud", data.geo_longitud],
+        ["Altitud", data.geo_altitud],
+      ],
+      ...tableConfig,
+    });
+
+    currentY = pdf.lastAutoTable.finalY + 16;
+
+    addSectionTitle("Antecedentes de Obra");
+    autoTable(pdf, {
+      startY: currentY,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["Tipo de obra", data.tipo_obra],
+        ["Código de obra", data.codigo_obra],
+      ],
+      ...tableConfig,
+    });
+
+    currentY = pdf.lastAutoTable.finalY + 16;
+
+    addSectionTitle("Antecedentes de Empresa");
+    autoTable(pdf, {
+      startY: currentY,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["RUT empresa", data.rut_empresa],
+        ["Nombre empresa", data.nombre_empresa],
+      ],
+      ...tableConfig,
+    });
+
+    currentY = pdf.lastAutoTable.finalY + 16;
+
+    addSectionTitle("Responsable Faena y/o Actividad");
+    autoTable(pdf, {
+      startY: currentY,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["RUT responsable", data.run_responsable],
+        ["Nombre responsable", data.nombre_responsable],
+        ["Persona acreditada", data.acreditado],
+        ["Cargo", data.cargo_acreditado],
+        ["Empresa acreditadora", data.empresa_acreditadora],
+        ["Fuerza de trabajo", data.fuerza_de_trabajo],
+      ],
+      ...tableConfig,
+    });
+
+    currentY = pdf.lastAutoTable.finalY + 16;
+
+    if (data.colaboradores?.length) {
+      addSectionTitle("Colaboradores");
       autoTable(pdf, {
-        startY: pdf.lastAutoTable.finalY + 8,
-        head: [["Descripción", "Estado", "Clasificación", "ID de Hallazgo"]],
-        body: data.hallazgos.map(h => [
+        startY: currentY,
+        head: [["RUT", "Nombre", "Cargo", "Empresa", "ID"]],
+        body: data.colaboradores.map((c) => [
+          c.rut_colaborador,
+          c.nombre_colaborador,
+          c.cargo_colaborador,
+          c.empresa_colaborador,
+          c.correlativo,
+        ]),
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [28, 87, 110] },
+      });
+
+      currentY = pdf.lastAutoTable.finalY + 16;
+    }
+
+    addSectionTitle("Antecedentes de Actividad");
+    autoTable(pdf, {
+      startY: currentY,
+      head: [["Campo", "Valor"]],
+      body: [
+        ["Tipo de actividad", data.tipo_actividad],
+        ["CGE", data.sociedad_cge],
+        ["Emergencia", data.emergencia],
+        ["IDS efectiva", data.ids_efectiva],
+        ["Descripción", data.descripcion_actividad],
+        ["IDS con hallazgos", data.ids_con_hallazgo],
+      ],
+      ...tableConfig,
+    });
+
+    currentY = pdf.lastAutoTable.finalY + 16;
+
+    if (data.hallazgos?.length) {
+      addSectionTitle("Hallazgos");
+      autoTable(pdf, {
+        startY: currentY,
+        head: [["Descripción", "Estado", "Clasificación", "ID"]],
+        body: data.hallazgos.map((h) => [
           h.descripcion,
           h.estado,
           h.clasificacion,
           h.correlativo,
         ]),
-        styles: { fontSize: 8 },
+        styles: { fontSize: 9 },
+        headStyles: { fillColor: [28, 87, 110] },
       });
     }
 
@@ -99,12 +240,5 @@ const PdfButton = styled.button`
 
   svg {
     color: #fee2e2;
-  }
-
-  @media (max-width: 640px) {
-    padding: 12px;
-    .label {
-      display: none;
-    }
   }
 `;

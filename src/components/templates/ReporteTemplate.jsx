@@ -64,6 +64,8 @@ export function ReporteTemplate() {
   const [user, setUser] = useState(null);
   const [open, setOpen] = useState(false);
   const [columnas, setColumnas] = useState([]);
+  const [modo, setModo] = useState("crear");
+  const [reporteSeleccionado, setReporteSeleccionado] = useState(null);
   const [colaboradores, setColaboradores] = useState([
   crearColaborador(),
 ]);
@@ -157,7 +159,7 @@ const [openColumns, setOpenColumns] = useState(false);
     direccion: "",
     geo_latitud: "",
     geo_longitud: "",
-    geo_altitud: "",
+    geo_altitud: "0",
   });
   
   
@@ -206,7 +208,7 @@ const [openColumns, setOpenColumns] = useState(false);
     setLoading(true);
 
     const { data, error } = await supabase
-      .from("v_registro_completo")
+      .from("v_registro_completo2")
       .select("*")
       .order("record_number", { ascending: true });
       
