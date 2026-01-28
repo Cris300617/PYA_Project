@@ -86,7 +86,7 @@ const SidebarContainer = styled.aside`
     transform: translateX(0);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     width: 240px;
     transform: ${({ $open }) =>
       $open ? "translateX(0)" : "translateX(-100%)"};
@@ -122,7 +122,7 @@ const Hamburger = styled.button`
     font-size: 24px;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: flex;
   }
 `;
@@ -164,9 +164,6 @@ const Menu = styled.nav`
   flex-direction: column;
   gap: 6px;
 
-  @media (max-width: 768px){
-    
-  }
 `;
 
 
@@ -193,11 +190,6 @@ const Item = styled(NavLink)`
     min-width: 22px;
   }
 
-  &:hover span {
-    opacity: 1;
-    transform: translateX(-10px);
-    transition: all 0.25s ease;
-  }
 
   &.active {
     background: rgba(74, 200, 165, 0.18);

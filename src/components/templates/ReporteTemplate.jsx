@@ -841,6 +841,7 @@ const TableHeader = styled.div`
 
   .pos-excel{
     @media (max-width: 1900px) {
+    margin-right: 200px;
   }
   }
 
@@ -1123,6 +1124,11 @@ const ColumnDropdown = styled.div`
     &:hover {
       background: #f8fafc;
     }
+
+    @media (max-width: 1900px) {
+
+      margin-right:200px;
+    }
   }
 
   .menu {
@@ -1148,7 +1154,6 @@ const ColumnDropdown = styled.div`
   gap: 10px;
 
   transform: translateX(0);
-
 }
 
 
