@@ -376,12 +376,15 @@ const TableHeader = styled.div`
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+  margin-left: 30px;
 `;
 
 const TitleGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+  
+  margin-top: 26px;
 
   h2 {
     font-size: 1.6rem;

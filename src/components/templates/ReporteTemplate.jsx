@@ -836,11 +836,11 @@ const TableHeader = styled.div`
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-top: 26px;
+  margin-top: 20px;
+  margin-left: 30px;
 
   .pos-excel{
     @media (max-width: 1900px) {
-    margin-right: 200px;
   }
   }
 
@@ -1006,7 +1006,7 @@ const Modal = styled.div`
 const TableWrapper = styled.div`
   padding: 30px;
   width: 100%;
-  max-width:1600px;
+  max-width:1300px;
   max-height: 600px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
@@ -1123,11 +1123,6 @@ const ColumnDropdown = styled.div`
     &:hover {
       background: #f8fafc;
     }
-
-    @media (max-width: 1900px) {
-
-      margin-right:200px;
-    }
   }
 
   .menu {
@@ -1154,10 +1149,6 @@ const ColumnDropdown = styled.div`
 
   transform: translateX(0);
 
-  @media (max-width: 1900px) {
-
-      margin-right:200px;
-    }
 }
 
 
