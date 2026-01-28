@@ -9,47 +9,48 @@ import { NavLink, useLocation, useNavigate } from "react-router-dom";
 
 export function Sidebar() {
   const { cerrarSesion } = useAuth();
+  const [open, setOpen] = useState(false);
 
   return (
-    <SidebarContainer>
-      <Top>
-        <img src={image} alt="logo" className="logo" />
+    <>
+      {/* BOTÓN HAMBURGUESA (solo mobile) */}
+      <Hamburger onClick={() => setOpen(true)}>
+        <Icon icon="solar:hamburger-menu-outline" />
+      </Hamburger>
 
-        <Menu>
-          <Item to="/">
-            <Icon icon="solar:home-2-outline" />
-            <span>Inicio</span>
+      {/* OVERLAY */}
+      <Overlay $open={open} onClick={() => setOpen(false)} />
+
+      <SidebarContainer $open={open}>
+        <Top>
+          <img src={image} alt="logo" className="logo" />
+
+          <Menu>
+            <Item to="/" onClick={() => setOpen(false)}>
+              <Icon icon="solar:home-2-outline" />
+              <span>Inicio</span>
+            </Item>
+
+            <Item to="/formulario" onClick={() => setOpen(false)}>
+              <Icon icon="solar:chart-outline" />
+              <span>Formularios</span>
+            </Item>
+
+            <Item to="/reporte" onClick={() => setOpen(false)}>
+              <Icon icon="solar:pulse-outline" />
+              <span>Reportes</span>
+            </Item>
+          </Menu>
+        </Top>
+
+        <Bottom>
+          <Item to="/login" onClick={cerrarSesion}>
+            <Icon icon="solar:skip-previous-outline" />
+            <span>Cerrar Sesión</span>
           </Item>
-
-          <Item to="/formulario">
-            <Icon icon="solar:chart-outline" />
-            <span>Formularios</span>
-          </Item>
-
-          <Item to="/reporte">
-            <Icon icon="solar:pulse-outline" />
-            <span>Reportes</span>
-          </Item>
-
-          <Item to="/profile">
-            <Icon icon="ant-design:user-outlined" />
-            <span>Perfil</span>
-          </Item>
-
-          <Item to="/activity">
-            <Icon icon="solar:bell-outline" />
-            <span>Notificaciones</span>
-          </Item>
-        </Menu>
-      </Top>
-
-      <Bottom>
-        <Item to="/login" onClick={cerrarSesion}>
-          <Icon icon="solar:skip-previous-outline" />
-          <span>Cerrar Sesión</span>
-        </Item>
-      </Bottom>
-    </SidebarContainer>
+        </Bottom>
+      </SidebarContainer>
+    </>
   );
 }
 
@@ -57,26 +58,21 @@ export function Sidebar() {
 
 const SidebarContainer = styled.aside`
   position: fixed;
-  inset: 0 auto 0 0;
-  width: 72px;
+  top: 0;
+  left: 0;
   height: 100vh;
-
   background: linear-gradient(180deg, #0f2027, #203a43);
-  border-top-right-radius: 24px;
-  border-bottom-right-radius: 24px;
-
+  z-index: 100;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  transition: transform 0.3s ease, width 0.3s ease;
 
-  overflow: hidden;
-  z-index: 100;
-
-  transition: width 0.35s ease, box-shadow 0.35s ease;
+  /* DESKTOP */
+  width: 72px;
 
   &:hover {
     width: 220px;
-    box-shadow: 8px 0 25px rgba(0, 0, 0, 0.45);
   }
 
   &:hover span {
@@ -84,20 +80,69 @@ const SidebarContainer = styled.aside`
     transform: translateX(0);
   }
 
+  /* MOBILE */
   @media (max-width: 768px) {
-    width: 64px;
+    width: 220px;
+    transform: ${({ $open }) =>
+      $open ? "translateX(0)" : "translateX(-100%)"};
 
     &:hover {
-      width: 180px;
+      width: 220px;
+    }
+
+    span {
+      opacity: 1;
+      transform: translateX(0);
     }
   }
-
-  .logo {
-  width: 100%;
-  max-width: 160px;
-  align-self: center;
-}
 `;
+
+const Hamburger = styled.button`
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 200;
+  background: #0f2027;
+  border: none;
+  color: white;
+  border-radius: 10px;
+  padding: 10px;
+  display: none;
+
+  svg {
+    font-size: 24px;
+  }
+
+  @media (max-width: 768px) {
+    display: flex;
+  }
+`;
+
+
+const Overlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 90;
+  opacity: ${({ $open }) => ($open ? 1 : 0)};
+  pointer-events: ${({ $open }) => ($open ? "auto" : "none")};
+  transition: opacity 0.3s ease;
+
+  @media (min-width: 769px) {
+    display: none;
+  }
+`;
+
+const Main = styled.main`
+  margin-left: 72px;
+  padding: 24px;
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
+`;
+
+
 
 const Top = styled.div`
   display: flex;
