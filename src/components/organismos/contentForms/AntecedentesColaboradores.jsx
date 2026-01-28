@@ -166,14 +166,22 @@ const Header = styled.div`
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: 1fr;
   gap: 12px;
+
+  min-width:180px;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
 `;
+
 
 const Field = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
+  min-width: 180px;
 
   label {
     font-size: 0.8rem;
@@ -184,7 +192,7 @@ const Field = styled.div`
 
   input {
     width: 100%;
-    max-width: 180px;
+    max-width: 160px;
     padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid #cbd5e1;

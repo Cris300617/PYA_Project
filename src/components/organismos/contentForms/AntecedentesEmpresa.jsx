@@ -109,12 +109,11 @@ const Container = styled.div`
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px 20px;
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .field {
-    color: #7496e0;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -129,7 +128,7 @@ const Container = styled.div`
 
   input {
     width: 100%;
-    max-width: 180px;
+    min-width:140px;
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #cbd5e1;
@@ -157,6 +156,7 @@ const Container = styled.div`
     max-height: 220px;
     overflow-y: auto;
     z-index: 20;
+    color: #60eff1;
   }
 
   .suggestions li {
@@ -175,4 +175,13 @@ const Container = styled.div`
     font-size: 0.75rem;
     color: #64748b;
   }
+
+  @media (min-width: 1024px) {
+    .grid {
+      grid-template-columns: repeat(1, 2fr);
+      gap: 16px 20px;
+      max-width: 240px;
+    }
+  }
 `;
+

@@ -193,7 +193,6 @@ const Container = styled.div`
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-/* Cuando está activo */
 .switch input:checked + .slider {
   background-color: #15e47c;
 }
@@ -209,17 +208,45 @@ const Container = styled.div`
 }
 
 
-  @media (max-width: 640px) {
-    .field.full {
-      grid-column: span 1;
-      max-width: 80%;
-    }
-
-    .field.sm input,
-    .field.md input {
-      max-width: 80%;
-    }
+  @media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr;
   }
+
+  .field.full {
+    grid-column: span 1;
+  }
+
+  .field.sm input,
+  .field.md input,
+  select {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+.grid {
+  display: grid;
+  gap: 20px; 
+}
+
+
+
+@media (min-width: 769px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .field.sm input {
+    max-width: 180px;
+  }
+
+  .field.md input {
+    max-width: 260px;
+  }
+}
+
+
 `;
 
 

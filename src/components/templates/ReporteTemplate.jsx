@@ -549,7 +549,7 @@ const columnasVisibles = columnas.filter(
       className="toggle"
       onClick={() => setOpenColumns(!openColumns)}
     >
-      Columnasss ▾
+      Columnas ▾
     </button>
 
     {openColumns && (

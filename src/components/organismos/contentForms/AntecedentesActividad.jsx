@@ -255,6 +255,7 @@ const Container = styled.div`
     input {
       font-size: 0.85rem;
       padding: 11px 12px;
+      min-width: 160px;
     }
   }
 `;

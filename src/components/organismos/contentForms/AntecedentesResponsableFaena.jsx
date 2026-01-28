@@ -166,9 +166,8 @@ const Container = styled.div`
 
   .box {
     display: grid;
-    grid-template-columns: repeat(2, minmax(240px, 1fr));
-    column-gap: 50px;
-    row-gap: 16px;
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
   .field {
@@ -178,19 +177,25 @@ const Container = styled.div`
     position: relative;
   }
 
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+  }
+
   input,
   select {
-    max-width: 240px;
+    width: 100%;
+    min-width: 140px;
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #cbd5e1;
     font-size: 0.9rem;
-    
+    background: #fff;
   }
 
-  label {
-    font-size: 0.8rem;
-    font-weight: 600;
+  input:disabled {
+    background: #f8fafc;
     color: #475569;
   }
 
@@ -198,10 +203,11 @@ const Container = styled.div`
     color: black;
     position: absolute;
     top: 100%;
+    left: 0;
+    width: 100%;
     background: #fff;
     border-radius: 10px;
     border: 1px solid #e2e8f0;
-    width: 100%;
     max-height: 220px;
     overflow-y: auto;
     z-index: 20;
@@ -222,4 +228,13 @@ const Container = styled.div`
     font-size: 0.75rem;
     color: #64748b;
   }
+
+  @media (min-width: 1024px) {
+    .box {
+      grid-template-columns: repeat(2, 1fr);
+      column-gap: 50px;
+      row-gap: 16px;
+    }
+    }
 `;
+

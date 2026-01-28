@@ -51,24 +51,25 @@ export function AntecedentesObra({ data, setData }) {
 }
 
 const Container = styled.div`
-  width: 845px;
+  width: 100%;
 
-  .box {
+    .box {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    width: 800px;
+    width: 100%;
   }
 
-  .row {
+
+    .row {
     display: flex;
     gap: 14px;
-    width: 50%;
     align-items: center;
+    width: 100%;
   }
 
+
   select {
-    width: 240px;
     padding: 12px 14px;
     border-radius: 10px;
     border: 1px solid #cbd5e1;
@@ -106,4 +107,38 @@ const Container = styled.div`
     color: #475569;
     margin-bottom: 5px;
   }
+
+    @media (max-width: 1024px) {
+      .row {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+      }
+
+      select,
+      input {
+        flex: 1;
+        width: 100%;
+        min-width: 140px;
+      }
+    }
+
+
+    @media (min-width: 1025px) {
+  .row {
+    flex-direction: row;
+  }
+
+  select {
+    width: 180px; 
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+
+
 `;
