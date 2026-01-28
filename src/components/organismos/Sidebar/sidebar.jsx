@@ -72,7 +72,7 @@ const SidebarContainer = styled.aside`
   transition: width 0.3s ease, transform 0.3s ease;
 
   width: 72px;
-  
+
   span{
     opacity:0;
   }
@@ -108,7 +108,7 @@ const SidebarContainer = styled.aside`
 
 const Hamburger = styled.button`
   position: fixed;
-  top: 16px;
+  top: 26px; //16 o 26 
   left: 16px;
   z-index: 200;
   background: #0f2027;
