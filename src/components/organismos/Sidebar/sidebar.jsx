@@ -13,12 +13,10 @@ export function Sidebar() {
 
   return (
     <>
-      {/* BOTÓN HAMBURGUESA (solo mobile) */}
-      <Hamburger onClick={() => setOpen(true)}>
+      <Hamburger onClick={() => setOpen(o => !o)}>
         <Icon icon="solar:hamburger-menu-outline" />
       </Hamburger>
 
-      {/* OVERLAY */}
       <Overlay $open={open} onClick={() => setOpen(false)} />
 
       <SidebarContainer $open={open}>
@@ -39,6 +37,11 @@ export function Sidebar() {
             <Item to="/reporte" onClick={() => setOpen(false)}>
               <Icon icon="solar:pulse-outline" />
               <span>Reportes</span>
+            </Item>
+
+            <Item to="/profile" onClick={() => setOpen(false)}>
+              <Icon icon="tabler:user-circle" />
+              <span>Perfil</span>
             </Item>
           </Menu>
         </Top>
@@ -62,14 +65,17 @@ const SidebarContainer = styled.aside`
   left: 0;
   height: 100vh;
   background: linear-gradient(180deg, #0f2027, #203a43);
-  z-index: 100;
+  z-index: 120;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: transform 0.3s ease, width 0.3s ease;
+  transition: width 0.3s ease, transform 0.3s ease;
 
-  /* DESKTOP */
   width: 72px;
+  
+  span{
+    opacity:0;
+  }
 
   &:hover {
     width: 220px;
@@ -80,22 +86,25 @@ const SidebarContainer = styled.aside`
     transform: translateX(0);
   }
 
-  /* MOBILE */
   @media (max-width: 768px) {
-    width: 220px;
+    width: 240px;
     transform: ${({ $open }) =>
       $open ? "translateX(0)" : "translateX(-100%)"};
 
     &:hover {
-      width: 220px;
+      width: 240px;
     }
 
     span {
-      opacity: 1;
-      transform: translateX(0);
+      opacity: ${({ $open }) => ($open ? 1 : 0)};
+      transform: ${({ $open }) =>
+        $open ? "translateX(0)" : "translateX(-100px)"};
     }
   }
 `;
+
+
+
 
 const Hamburger = styled.button`
   position: fixed;
@@ -123,22 +132,13 @@ const Overlay = styled.div`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
-  z-index: 90;
+  z-index: 110;
   opacity: ${({ $open }) => ($open ? 1 : 0)};
   pointer-events: ${({ $open }) => ($open ? "auto" : "none")};
   transition: opacity 0.3s ease;
 
   @media (min-width: 769px) {
     display: none;
-  }
-`;
-
-const Main = styled.main`
-  margin-left: 72px;
-  padding: 24px;
-
-  @media (max-width: 768px) {
-    margin-left: 0;
   }
 `;
 
@@ -163,6 +163,10 @@ const Menu = styled.nav`
   display: flex;
   flex-direction: column;
   gap: 6px;
+
+  @media (max-width: 768px){
+    
+  }
 `;
 
 
@@ -189,8 +193,8 @@ const Item = styled(NavLink)`
     min-width: 22px;
   }
 
-  span {
-    opacity: 0;
+  &:hover span {
+    opacity: 1;
     transform: translateX(-10px);
     transition: all 0.25s ease;
   }

@@ -21,5 +21,4 @@ const Layout = styled.div`
 const Main = styled.main`
   flex: 1;
   background: #ffffff;
-  padding-left: 72px; /* si tu sidebar es fijo */
 `;
