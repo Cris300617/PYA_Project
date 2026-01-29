@@ -839,11 +839,6 @@ const TableHeader = styled.div`
   margin-top: 20px;
   margin-left: 30px;
 
-  .pos-excel{
-    @media (max-width: 1900px) {
-    margin-right: 200px;
-  }
-  }
 
   @media (max-width: 1024px) {
     flex-direction: column;
@@ -1127,7 +1122,6 @@ const ColumnDropdown = styled.div`
 
     @media (max-width: 1900px) {
 
-      margin-right:200px;
     }
   }
 
