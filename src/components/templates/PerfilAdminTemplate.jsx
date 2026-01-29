@@ -180,16 +180,21 @@ async function eliminarUsuario(user) {
                 <tbody>
                   {usuarios.map((u) => (
                     <tr key={u.id}>
-                      <td>
+                      <td data-label="Usuario">
                         <strong>{u.username}</strong>
                         <span>{u.nombre}</span>
                       </td>
-                      <td>
+
+                      <td data-label="Rol">
                         <RoleBadge role={u.rol}>{u.rol}</RoleBadge>
                       </td>
-                      <td>{new Date(u.created_at).toLocaleDateString()}</td>
+
+                      <td data-label="Creado">
+                        {new Date(u.created_at).toLocaleDateString()}
+                      </td>
+
                       {currentUser?.rol === "admin" && (
-                        <td>
+                        <td className="actions" data-label="Acciones">
                           <div className="row-actions">
                             <Icon
                               icon="majesticons:edit-pen-2-line"
@@ -205,11 +210,10 @@ async function eliminarUsuario(user) {
                           </div>
                         </td>
                       )}
-
-
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             )}
           </TableWrapper>
@@ -377,7 +381,21 @@ const TableHeader = styled.div`
   gap: 16px;
   flex-wrap: wrap;
   margin-left: 30px;
+
+  @media (max-width: 1024px) {
+    margin-left: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  @media (max-width: 468px) {
+  button {
+    align-self: center;
+  }
+}
 `;
+
 
 const TitleGroup = styled.div`
   display: flex;
@@ -422,6 +440,7 @@ const TableCard = styled.div`
 `;
 
 const TableWrapper = styled.div`
+  width: 100%;
   overflow-x: auto;
 
   table {
@@ -432,7 +451,6 @@ const TableWrapper = styled.div`
 
   thead {
     background: #f1f5f9;
-    text-align: left;
   }
 
   th {
@@ -460,8 +478,65 @@ const TableWrapper = styled.div`
     color: #64748b;
   }
 
-  tbody tr:hover {
-    background: #f8fafc;
+  .row-actions {
+    display: flex;
+    gap: 12px;
+  }
+
+  .row-actions svg {
+    font-size: 20px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 768px) {
+    table,
+    tbody,
+    tr,
+    td {
+      display: block;
+      width: 100%;
+    }
+
+    thead {
+      display: none;
+    }
+
+    tbody tr {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    td {
+      border: none;
+      padding: 8px 0;
+    }
+
+    td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+
+    td.actions {
+      margin-top: 10px;
+    }
+
+    td.actions::before {
+      display: none;
+    }
+
+    .row-actions {
+      margin-right: 25px;
+      justify-content: flex-end;
+      gap: 16px;
+    }
   }
 `;
 
@@ -578,6 +653,12 @@ const RightHeader = styled.div`
   align-items: center;
   gap: 14px;
 
+  @media (max-width: 468px){
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+
   button {
     padding: 12px 22px;
     border-radius: 999px;
@@ -586,5 +667,13 @@ const RightHeader = styled.div`
     font-weight: 600;
     border: none;
     cursor: pointer;
+
+    @media (max-width: 468px){
+      display: flex;
+      width:100px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
   }
 `;
