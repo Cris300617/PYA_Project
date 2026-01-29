@@ -88,12 +88,12 @@ export function Btnexcel() {
 
   const tablaPorVista = {
     resumen: "v_registro_completo",
-    obra: "v_antecedentes_obra2",
-    empresa: "v_antecedentes_empresa",
-    actividad: "v_antecedentes_actividad",
-    ubicacion: "v_antecedentes_ubicacion",
-    inspeccion: "v_antecedentes_inspeccion",
-    faena: "v_antecedentes_faena",
+    obra: "v_antecedentes_obra_def",
+    empresa: "v_antecedentes_empresa_def",
+    actividad: "v_antecedentes_actividad_def",
+    ubicacion: "v_antecedentes_ubicacion_def",
+    inspeccion: "v_antecedentes_inspeccion_def",
+    faena: "v_antecedentes_faena_def",
     hallazgos: "info_hallazgos",
   };
 
