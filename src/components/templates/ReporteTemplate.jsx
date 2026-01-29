@@ -1085,6 +1085,12 @@ const TableWrapper = styled.div`
       min-width: 400px;
     }
   }
+
+  @media (min-width: 1920px) {
+    max-width: 1700px;
+  }
+
+  
 `;
 
 
