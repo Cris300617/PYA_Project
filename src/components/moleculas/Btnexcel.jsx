@@ -14,28 +14,56 @@ export function Btnexcel() {
   const [vistaSeleccionada, setVistaSeleccionada] = useState("resumen");
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(null);
 
   const dropdownRef = useRef(null);
 
   useEffect(() => {
+    cargarUsuario();
     cargarDatasets();
 
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
         setOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  async function cargarUsuario() {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth?.user) return;
+
+    const { data } = await supabase
+      .from("profiles")
+      .select("username, rol")
+      .eq("id", auth.user.id)
+      .single();
+
+    setUser(data);
+  }
 
   async function cargarDatasets() {
     setLoading(true);
 
-    const [resumen, obra, empresa, actividad, ubicacion, inspeccion, faena, hallazgos] = await Promise.all([
+    const [
+      resumen,
+      obra,
+      empresa,
+      actividad,
+      ubicacion,
+      inspeccion,
+      faena,
+      hallazgos,
+    ] = await Promise.all([
       supabase.from("v_registro_completo").select("*"),
-      supabase.from("v_antecedentes_obra").select("*"),
+      supabase.from("v_antecedentes_obra2").select("*"),
       supabase.from("v_antecedentes_empresa").select("*"),
       supabase.from("v_antecedentes_actividad").select("*"),
       supabase.from("v_antecedentes_ubicacion").select("*"),
@@ -58,15 +86,48 @@ export function Btnexcel() {
     setLoading(false);
   }
 
-  const exportarExcel = () => {
-    const data = datasets[vistaSeleccionada];
-    if (!data || !data.length) return;
+  const tablaPorVista = {
+    resumen: "v_registro_completo",
+    obra: "v_antecedentes_obra2",
+    empresa: "v_antecedentes_empresa",
+    actividad: "v_antecedentes_actividad",
+    ubicacion: "v_antecedentes_ubicacion",
+    inspeccion: "v_antecedentes_inspeccion",
+    faena: "v_antecedentes_faena",
+    hallazgos: "info_hallazgos",
+  };
+
+  const exportarExcel = async () => {
+    if (!user) return;
+
+    setLoading(true);
+
+    let query = supabase
+      .from(tablaPorVista[vistaSeleccionada])
+      .select("*");
+
+    if (user.rol !== "admin") {
+      query = query.eq("username", user.username);
+    }
+
+    const { data, error } = await query;
+    setLoading(false);
+
+    if (error || !data?.length) return;
 
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(data);
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, vistaSeleccionada);
-    XLSX.writeFile(workbook, `export_${vistaSeleccionada}.xlsx`);
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      vistaSeleccionada
+    );
+
+    XLSX.writeFile(
+      workbook,
+      `export_${vistaSeleccionada}.xlsx`
+    );
   };
 
   const opciones = {
@@ -132,7 +193,6 @@ export function Btnexcel() {
                 {opt.icon}
                 {opt.label}
               </DropdownItem>
-
             ))}
           </DropdownMenu>
         )}
@@ -140,19 +200,16 @@ export function Btnexcel() {
 
       <ExcelButton
         onClick={exportarExcel}
-        disabled={!datasets[vistaSeleccionada]?.length || loading}
+        disabled={loading || !user}
       >
         <FaFileExcel size={18} />
-          <span className="text">
-            {loading ? "Cargando..." : "Exportar Excel"}
-          </span>
+        <span className="text">
+          {loading ? "Exportando..." : "Exportar Excel"}
+        </span>
       </ExcelButton>
     </Toolbar>
   );
 }
-
-
-
 
 
 const Toolbar = styled.div`
@@ -173,7 +230,6 @@ const DropdownButton = styled.button`
   gap: 12px;
 
   min-width: 220px;
-
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -185,7 +241,6 @@ const DropdownButton = styled.button`
 
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-
   transition: all 0.2s ease;
 
   .label {
@@ -201,8 +256,6 @@ const DropdownButton = styled.button`
   &:hover {
     border-color: #cbd5e1;
   }
-
-  
 `;
 
 const DropdownMenu = styled.div`
@@ -252,8 +305,6 @@ const DropdownItem = styled.button`
   }
 `;
 
-
-/* ===== Botón Excel ===== */
 const ExcelButton = styled.button`
   display: flex;
   align-items: center;
@@ -271,7 +322,6 @@ const ExcelButton = styled.button`
 
   cursor: pointer;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
-
   transition: all 0.25s ease;
 
   &:hover {
@@ -293,7 +343,6 @@ const ExcelButton = styled.button`
     color: #e6f4ea;
   }
 
-  /* 📱 MOBILE: solo icono */
   @media (max-width: 640px) {
     padding: 12px;
     border-radius: 50%;
@@ -308,4 +357,3 @@ const ExcelButton = styled.button`
     }
   }
 `;
-

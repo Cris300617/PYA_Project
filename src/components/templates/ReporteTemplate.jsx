@@ -1044,10 +1044,10 @@ const TableWrapper = styled.div`
     background: #f8fafc;
   }
 
-  tbody tr:hover {
+  /* tbody tr:hover {
     background: #eef6f4;
     transform: scale(1.002);
-  }
+  } */
 
   td {
     padding: 14px 16px;
