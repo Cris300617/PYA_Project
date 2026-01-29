@@ -69,12 +69,19 @@ const SidebarContainer = styled.aside`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: width 0.3s ease, transform 0.3s ease;
+  border-end-end-radius: 20px;
+  border-start-end-radius:20px;
 
   width: 72px;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 
-  span{
-    opacity:0;
+  span {
+    opacity: 0;
+    transform: translateX(-12px);
+    transition: 
+      opacity 0.2s ease,
+      transform 0.2s ease;
+    transition-delay: 0s;
   }
 
   &:hover {
@@ -84,24 +91,24 @@ const SidebarContainer = styled.aside`
   &:hover span {
     opacity: 1;
     transform: translateX(0);
+    transition-delay: 0.12s;
   }
 
   @media (max-width: 1024px) {
     width: 240px;
     transform: ${({ $open }) =>
       $open ? "translateX(0)" : "translateX(-100%)"};
-
-    &:hover {
-      width: 240px;
-    }
+    transition: transform 0.3s ease;
 
     span {
       opacity: ${({ $open }) => ($open ? 1 : 0)};
       transform: ${({ $open }) =>
-        $open ? "translateX(0)" : "translateX(-100px)"};
+        $open ? "translateX(0)" : "translateX(-12px)"};
+      transition-delay: 0s;
     }
   }
 `;
+
 
 
 

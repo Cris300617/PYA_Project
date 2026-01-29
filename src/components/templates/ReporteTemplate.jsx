@@ -545,7 +545,9 @@ const columnasVisibles = columnas.filter(
   </FiltersBar>
 
   <ColumnDropdown>
-    <button
+    <div>
+
+      <button
       className="toggle"
       onClick={() => setOpenColumns(!openColumns)}
     >
@@ -571,6 +573,9 @@ const columnasVisibles = columnas.filter(
         ))}
       </div>
     )}
+      
+    </div>
+    
   </ColumnDropdown>
 </TableControls>
 
@@ -840,7 +845,7 @@ const TableHeader = styled.div`
   margin-left: 30px;
 
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1479px) {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -1125,36 +1130,41 @@ const ColumnDropdown = styled.div`
     &:hover {
       background: #f8fafc;
     }
+  }
 
-    @media (max-width: 1900px) {
-
-    }
+ .toggle-wrapper {
+    position: relative;
+    display: inline-block;
   }
 
   .menu {
-  position: absolute;
-  top: 120%;          
-  right: 0;           
+    position: absolute;
+    top: 120%;
+    left: 0;
+    
+    min-width: 220px;
+    max-width: calc(100vw - 24px);
 
-  min-width: 220px;
-  max-width: calc(100vw - 24px);
+    background: white;
+    border-radius: 14px;
+    padding: 12px;
 
-  background: white;
-  border-radius: 14px;
-  padding: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+    z-index: 100;
 
-  box-shadow: 0 10px 30px rgba(0,0,0,.15);
-  z-index: 100;
+    max-height: 400px;
+    overflow-y: auto;
 
-  overflow-y: auto;
-  max-height: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+    @media (min-width: 1025px){
+      transform: translateX(-80px);
 
-  transform: translateX(0);
-}
+    }
+    
+  }
 
 
 
@@ -1180,7 +1190,7 @@ const TableControls = styled.div`
 
   margin: 20px 25px 5px 25px;
 
-  @media (max-width: 640px) {
+  @media (max-width: 1479px) {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
