@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { supabase } from "../../../supabase/supabase.config";
 
@@ -15,40 +15,104 @@ export function AntecedentesColaboradores({
   colaboradores = [],
   setColaboradores,
 }) {
-  const [resultados, setResultados] = useState({});
+  const [sugerencias, setSugerencias] = useState({});
+  const [cargos, setCargos] = useState({});
+  const [personaSeleccionada, setPersonaSeleccionada] = useState({});
+  const wrapperRef = useRef({});
 
-  const buscarColaborador = async (rut, index) => {
-    if (!rut || rut.length < 3) {
-      setResultados((prev) => ({ ...prev, [index]: [] }));
-      return;
-    }
 
-    const { data, error } = await supabase
-      .from("colaboradores") 
-      .select("rut, nombre, cargo, acreditado, empresa_acreditadora")
-      .like("rut", `%${rut}%`) 
-      .limit(10);
+  const buscarRut = async (index, valor) => {
+  if (!valor || valor.trim().length < 1) {
+    setSugerencias((prev) => ({ ...prev, [index]: [] }));
+    return;
+  }
 
-    if (!error && data) {
-      setResultados((prev) => ({
-        ...prev,
-        [index]: data,
-      }));
-    } else {
-      console.error("Error buscando colaborador:", error);
-    }
+  const palabras = valor
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  let query = supabase
+    .from("colaboradores")
+    .select("rut, nombre");
+
+  palabras.forEach((p) => {
+    query = query.ilike("nombre", `%${p}%`);
+  });
+
+  const { data, error } = await query.limit(50);
+
+  if (error || !data) return;
+
+  const unicos = Object.values(
+    data.reduce((acc, cur) => {
+      const key = `${cur.rut}-${cur.nombre}`;
+      acc[key] = cur;
+      return acc;
+    }, {})
+  );
+
+  setSugerencias((prev) => ({ ...prev, [index]: unicos }));
+};
+
+
+
+useEffect(() => {
+  const handleClickOutside = (e) => {
+    Object.keys(wrapperRef.current).forEach((key) => {
+      if (
+        wrapperRef.current[key] &&
+        !wrapperRef.current[key].contains(e.target)
+      ) {
+        setSugerencias((prev) => ({ ...prev, [key]: [] }));
+      }
+    });
   };
 
-  const seleccionarColaborador = (index, c) => {
+  document.addEventListener("mousedown", handleClickOutside);
+  return () =>
+    document.removeEventListener("mousedown", handleClickOutside);
+}, []);
+
+
+  const seleccionarPersona = async (index, persona) => {
     actualizarColaborador(index, {
-      rut_colaborador: c.rut || "",
-      nombre_colaborador: c.nombre || "",
-      cargo_colaborador: c.cargo || "",
-      acreditado_colaborador: c.acreditado ? "Si" : "No",
-      empresa_colaborador: c.empresa_acreditadora || "",
+      rut_colaborador: persona.rut,
+      nombre_colaborador: persona.nombre,
+      cargo_colaborador: "",
+      acreditado_colaborador: "",
+      empresa_colaborador: "",
     });
 
-    setResultados((prev) => ({ ...prev, [index]: [] }));
+    setPersonaSeleccionada((prev) => ({ ...prev, [index]: true }));
+    setSugerencias((prev) => ({ ...prev, [index]: [] }));
+
+    const { data } = await supabase
+      .from("colaboradores")
+      .select("cargo")
+      .eq("rut", persona.rut);
+
+    const cargosUnicos = [...new Set(data.map((c) => c.cargo))];
+    setCargos((prev) => ({ ...prev, [index]: cargosUnicos }));
+  };
+
+
+  const seleccionarCargo = async (index, cargo) => {
+    const rut = colaboradores[index].rut_colaborador;
+
+    const { data } = await supabase
+      .from("colaboradores")
+      .select("acreditado, empresa_acreditadora")
+      .eq("rut", rut)
+      .eq("cargo", cargo)
+      .single();
+
+    actualizarColaborador(index, {
+      cargo_colaborador: cargo,
+      acreditado_colaborador: data?.acreditado ? "Si" : "No",
+      empresa_colaborador: data?.empresa_acreditadora || "",
+    });
   };
 
   const actualizarColaborador = (index, cambios) => {
@@ -71,47 +135,72 @@ export function AntecedentesColaboradores({
         <Card key={c.id}>
           <Header>
             <h4>Colaborador #{index + 1}</h4>
-
             {colaboradores.length > 1 && (
-              <button type="button" onClick={() => eliminarColaborador(c.id)}>
-                ✕
-              </button>
+              <button onClick={() => eliminarColaborador(c.id)}>✕</button>
             )}
           </Header>
 
-          <Field>
-            <label>RUT Colaborador</label>
+          <Field ref={(el) => (wrapperRef.current[index] = el)}>
+
+            <label>Nombre Colaborador</label>
             <input
-              value={c.rut_colaborador}
+              value={c.nombre_colaborador}
+              placeholder="Buscar por nombre..."
+              onFocus={() => buscarRut(index, c.nombre_colaborador)}
               onChange={(e) => {
                 actualizarColaborador(index, {
-                  rut_colaborador: e.target.value,
+                  nombre_colaborador: e.target.value,
                 });
-                buscarColaborador(e.target.value, index);
+                setPersonaSeleccionada((prev) => ({ ...prev, [index]: false }));
+                buscarRut(index, e.target.value);
               }}
-              placeholder="Ej: 12.345.678-9"
             />
 
-            {resultados[index]?.length > 0 && (
+
+
+            {sugerencias[index]?.length > 0 && (
               <Autocomplete>
-                {resultados[index].map((r, i) => (
-                  <li key={i} onClick={() => seleccionarColaborador(index, r)}>
-                    {r.rut} – {r.nombre}
+                <ul className="suggestions">
+                  {sugerencias[index].map((s) => (
+                  <li
+                    key={s.nombre}
+                    onClick={() => seleccionarPersona(index, s)}
+                  >
+                    <strong>{s.nombre}</strong>
+                    <span>{s.rut}</span>
                   </li>
                 ))}
+
+                </ul>
+                
               </Autocomplete>
             )}
           </Field>
 
-          <Grid>
-            <Field>
-              <label>Nombre</label>
-              <input value={c.nombre_colaborador} disabled />
-            </Field>
 
+          {personaSeleccionada[index] && (
             <Field>
               <label>Cargo</label>
-              <input value={c.cargo_colaborador} disabled />
+              <select
+                value={c.cargo_colaborador}
+                onChange={(e) =>
+                  seleccionarCargo(index, e.target.value)
+                }
+              >
+                <option value="">Seleccionar cargo</option>
+                {cargos[index]?.map((cargo) => (
+                  <option key={cargo} value={cargo}>
+                    {cargo}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
+
+          <Grid>
+            <Field>
+              <label>Rut colaborador</label>
+              <input value={c.rut_colaborador} disabled />
             </Field>
 
             <Field>
@@ -127,12 +216,13 @@ export function AntecedentesColaboradores({
         </Card>
       ))}
 
-      <AddButton type="button" onClick={agregarColaborador}>
+      <AddButton onClick={agregarColaborador}>
         + Agregar colaborador
       </AddButton>
     </Container>
   );
 }
+
 
 
 
@@ -190,9 +280,17 @@ const Field = styled.div`
     color: #475569;
   }
 
-  input {
+  input{
     width: 100%;
     max-width: 160px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+  }
+
+  select{
+    width: 100%;
+    max-width: 180px;
     padding: 10px 12px;
     border-radius: 8px;
     border: 1px solid #cbd5e1;
@@ -200,7 +298,8 @@ const Field = styled.div`
 `;
 
 const Autocomplete = styled.ul`
-  position: absolute;
+
+  /* position: absolute;
   color: black;
   top: 64px;
   width: 100%;
@@ -212,15 +311,40 @@ const Autocomplete = styled.ul`
   padding: 0;
   margin: 0;
 
-  li {
-    padding: 8px 10px;
-    cursor: pointer;
+  max-height: 220px;
+  overflow-y: auto; */
 
-    &:hover {
-      background: #f1f5f9;
-    }
+  .suggestions {
+    color: black;
+    position: absolute;
+    top: 80%;
+    left: 0;
+    width: 100%;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 20;
+  }
+
+  .suggestions li {
+    padding: 10px 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .suggestions li:hover {
+    background: #f1f5f9;
+  }
+
+  .suggestions span {
+    font-size: 0.75rem;
+    color: #64748b;
   }
 `;
+
 
 const AddButton = styled.button`
   align-self: flex-start;

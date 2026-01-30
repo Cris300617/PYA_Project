@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { supabase } from "../../../supabase/supabase.config";
 
@@ -8,34 +8,66 @@ export function AntecedentesResponsableFaena({ data, setData }) {
   const [cargos, setCargos] = useState([]);
   const [personaSeleccionada, setPersonaSeleccionada] = useState(false);
   const [cargoSeleccionado, setCargoSeleccionado] = useState(false);
+  const wrapperRef = useRef(null);
+
+
+
+  useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (
+      wrapperRef.current &&
+      !wrapperRef.current.contains(e.target)
+    ) {
+      setSugerencias([]);
+    }
+  };
+
+  document.addEventListener("mousedown", handleClickOutside);
+  return () =>
+    document.removeEventListener("mousedown", handleClickOutside);
+}, []);
 
  
   useEffect(() => {
-    if (query.length < 2 || personaSeleccionada) {
-      setSugerencias([]);
-      return;
+  if (query.length < 1 || personaSeleccionada) {
+    setSugerencias([]);
+    return;
+  }
+
+  const buscar = async () => {
+    const palabras = query
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+
+    let supabaseQuery = supabase
+      .from("colaboradores")
+      .select("rut, nombre");
+
+    palabras.forEach((p) => {
+      supabaseQuery = supabaseQuery.ilike("nombre", `%${p}%`);
+    });
+
+    const { data, error } = await supabaseQuery.limit(50);
+
+    if (!error && data) {
+      
+      const unicos = Object.values(
+        data.reduce((acc, cur) => {
+          const key = `${cur.rut}-${cur.nombre}`;
+          acc[key] = cur;
+          return acc;
+        }, {})
+      );
+
+      setSugerencias(unicos);
     }
+  };
 
-    const buscar = async () => {
-      const { data, error } = await supabase
-        .from("colaboradores")
-        .select("rut, nombre")
-        .ilike("nombre", `%${query}%`)
-        .limit(50);
+  buscar();
+}, [query, personaSeleccionada]);
 
-      if (!error && data) {
-        const unicos = Object.values(
-          data.reduce((acc, cur) => {
-            acc[cur.rut] = cur;
-            return acc;
-          }, {})
-        );
-        setSugerencias(unicos);
-      }
-    };
-
-    buscar();
-  }, [query, personaSeleccionada]);
 
 
   const seleccionarPersona = async (persona) => {
@@ -83,12 +115,16 @@ export function AntecedentesResponsableFaena({ data, setData }) {
   return (
     <Container>
       <section className="box">
-        <div className="field autocomplete">
+        <div className="field autocomplete" ref={wrapperRef}>
+
           <label>Nombre Responsable</label>
           <input
             type="text"
             placeholder="Buscar responsable..."
             value={query}
+            onFocus={() => {
+              setPersonaSeleccionada(false);
+            }}
             onChange={(e) => {
               setQuery(e.target.value);
               setPersonaSeleccionada(false);
