@@ -69,7 +69,7 @@ export function Btnexcel() {
       supabase.from("v_antecedentes_ubicacion").select("*"),
       supabase.from("v_antecedentes_inspeccion").select("*"),
       supabase.from("v_antecedentes_faena").select("*"),
-      supabase.from("info_hallazgos").select("*"),
+      supabase.from("v_hallazgos").select("*"),
     ]);
 
     setDatasets({
@@ -94,7 +94,7 @@ export function Btnexcel() {
     ubicacion: "v_antecedentes_ubicacion_def",
     inspeccion: "v_antecedentes_inspeccion_def",
     faena: "v_antecedentes_faena_def",
-    hallazgos: "info_hallazgos",
+    hallazgos: "v_hallazgos",
   };
 
   const exportarExcel = async () => {

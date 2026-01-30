@@ -467,11 +467,11 @@ const Form = styled.form`
     }
 
     .submit {
-      background: #6366f1;
-      color: white;
+      background: linear-gradient(90deg, #22c55e, #4ade80);
+      color: #064e3b;
 
       &:hover {
-        background: #4f46e5;
+        background: linear-gradient(90deg, #89e4aa, #4ade80);
       }
     }
   }
