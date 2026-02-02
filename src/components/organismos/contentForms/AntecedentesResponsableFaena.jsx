@@ -119,6 +119,7 @@ export function AntecedentesResponsableFaena({ data, setData }) {
 
           <label>Nombre Responsable</label>
           <input
+            required
             type="text"
             placeholder="Buscar responsable..."
             value={query}
@@ -148,6 +149,7 @@ export function AntecedentesResponsableFaena({ data, setData }) {
           <div className="field">
             <label>Cargo Acreditado</label>
             <select
+              required
               value={data.cargo_acreditado || ""}
               onChange={(e) => seleccionarCargo(e.target.value)}
             >

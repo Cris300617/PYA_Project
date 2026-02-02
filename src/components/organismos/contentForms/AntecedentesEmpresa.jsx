@@ -59,6 +59,7 @@ export function AntecedentesEmpresa({ data, setData }) {
         <div className="field autocomplete">
           <label>RUT Empresa</label>
           <input
+            required
             type="text"
             placeholder="Ej: 76.123.456-7"
             value={query}
@@ -92,6 +93,7 @@ export function AntecedentesEmpresa({ data, setData }) {
           <div className="field">
             <label>Nombre Empresa</label>
             <input
+              required
               type="text"
               value={data.nombre_empresa || ""}
               disabled

@@ -83,6 +83,7 @@ export function AntecedentesUbicacion({ data, setData }) {
     <div className="field autocomplete" ref={autocompleteRef}>
           <label>Delegación</label>
           <input
+            required
             value={data.delegacion || ""}
             onChange={(e) =>
               setData({ ...data, delegacion: e.target.value })
@@ -133,6 +134,7 @@ export function AntecedentesUbicacion({ data, setData }) {
         <div className="field">
           <label>Dirección</label>
           <input
+            required
             value={data.direccion || ""}
             onChange={(e) =>
               setData({ ...data, direccion: e.target.value })
@@ -143,6 +145,7 @@ export function AntecedentesUbicacion({ data, setData }) {
         <div className="field">
           <label>Latitud</label>
           <input
+            required
             type="number"
             step="any"
             value={data.geo_latitud ?? ""}
@@ -159,6 +162,7 @@ export function AntecedentesUbicacion({ data, setData }) {
         <div className="field">
           <label>Longitud</label>
           <input
+            required
             type="number"
             step="any"
             value={data.geo_longitud ?? ""}
@@ -190,7 +194,7 @@ export function AntecedentesUbicacion({ data, setData }) {
 
         <div className="field">
           <label>&nbsp;</label>
-          <button className="geo-btn" onClick={obtenerUbicacion}>
+          <button type="button" className="geo-btn" onClick={obtenerUbicacion}>
             <Icon icon="mdi:crosshairs-gps" width="20" />
             <span>Usar mi ubicación</span>
           </button>

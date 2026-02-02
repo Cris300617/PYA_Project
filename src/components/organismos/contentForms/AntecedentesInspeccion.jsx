@@ -9,6 +9,7 @@ export function AntecedentesInspeccion({ data, setData }) {
           <div className="field sm">
             <label>Fecha IDS</label>
             <input
+              required
               type="date"
               value={data.fecha_ids || ""}
               onChange={(e) =>
@@ -20,6 +21,7 @@ export function AntecedentesInspeccion({ data, setData }) {
           <div className="field sm">
             <label>Hora IDS</label>
             <input
+              required
               type="time"
               value={data.hora_ids || ""}
               onChange={(e) =>
@@ -32,6 +34,7 @@ export function AntecedentesInspeccion({ data, setData }) {
             <label>División</label>
 
             <select
+              required
               value={data.division}
               onChange={(e) =>
                 setData({
@@ -50,6 +53,7 @@ export function AntecedentesInspeccion({ data, setData }) {
           <div className="field sm">
             <label>Hora inicio faena</label>
             <input
+              required
               type="time"
               value={data.hora_inicio_faena || ""}
               onChange={(e) =>
@@ -61,6 +65,7 @@ export function AntecedentesInspeccion({ data, setData }) {
           <div className="field sm">
             <label>Hora término faena</label>
             <input
+              required
               type="time"
               value={data.hora_termino_faena || ""}
               onChange={(e) =>

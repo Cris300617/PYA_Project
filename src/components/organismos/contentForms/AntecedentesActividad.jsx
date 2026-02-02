@@ -61,6 +61,7 @@ export function AntecedentesActividad({ data, setData }) {
           <label>Tipo de Actividad</label>
 
           <input
+            required
             type="text"
             placeholder="Tipo de Actividad"
             value={query}
@@ -92,6 +93,7 @@ export function AntecedentesActividad({ data, setData }) {
         <div className="field">
           <label>Sociedad CGE</label>
           <select
+            required
             value={data.sociedad_cge || ""}
             onChange={(e) =>
               setData({ ...data, sociedad_cge: e.target.value })
@@ -109,6 +111,7 @@ export function AntecedentesActividad({ data, setData }) {
         <div className="field">
           <label>Existe Alguna Emergencia</label>
           <select
+            required
             value={data.emergencia || ""}
             onChange={(e) =>
               setData({ ...data, emergencia: e.target.value })
@@ -123,6 +126,7 @@ export function AntecedentesActividad({ data, setData }) {
         <div className="field">
           <label>¿La IDS es Efectiva?</label>
           <select
+            required
             value={data.ids_efectiva || ""}
             onChange={(e) =>
               setData({ ...data, ids_efectiva: e.target.value })
@@ -147,6 +151,7 @@ export function AntecedentesActividad({ data, setData }) {
         <div className="field">
           <label>¿La IDS posee hallazgos?</label>
           <select
+            required
             value={data.ids_con_hallazgo || ""}
             onChange={(e) =>
               setData({ ...data, ids_con_hallazgo: e.target.value })

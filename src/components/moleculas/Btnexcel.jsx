@@ -63,12 +63,12 @@ export function Btnexcel() {
       hallazgos,
     ] = await Promise.all([
       supabase.from("v_registro_completo").select("*"),
-      supabase.from("v_antecedentes_obra2").select("*"),
-      supabase.from("v_antecedentes_empresa").select("*"),
-      supabase.from("v_antecedentes_actividad").select("*"),
-      supabase.from("v_antecedentes_ubicacion").select("*"),
-      supabase.from("v_antecedentes_inspeccion").select("*"),
-      supabase.from("v_antecedentes_faena").select("*"),
+      supabase.from("v_antecedentes_obra_def").select("*"),
+      supabase.from("v_antecedentes_empresa_def").select("*"),
+      supabase.from("v_antecedentes_actividad_def").select("*"),
+      supabase.from("v_antecedentes_ubicacion_def").select("*"),
+      supabase.from("v_antecedentes_inspeccion_def").select("*"),
+      supabase.from("v_antecedentes_faena_def").select("*"),
       supabase.from("v_hallazgos").select("*"),
     ]);
 

@@ -216,7 +216,7 @@ useEffect(() => {
         </Card>
       ))}
 
-      <AddButton onClick={agregarColaborador}>
+      <AddButton onClick={agregarColaborador} type="button">
         + Agregar colaborador
       </AddButton>
     </Container>

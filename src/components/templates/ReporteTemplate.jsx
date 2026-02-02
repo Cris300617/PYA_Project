@@ -26,7 +26,7 @@ const crearHallazgo = () => ({
   paralizacion: "",
   potencializacion: "",
   tipo_hallazgo: "",
-  evidencia: "",
+  evidencia: null,
   clasificacion: "",
   control_asociado: "",
   fecha_cierre: "",
@@ -238,6 +238,11 @@ const [openColumns, setOpenColumns] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (!e.currentTarget.checkValidity()) {
+      e.currentTarget.reportValidity(); // muestra error y enfoca
+      return;
+    }
     if (!template) return;
 
     try {
@@ -445,7 +450,7 @@ const [openColumns, setOpenColumns] = useState(false);
     setHallazgos([{ descripcion: "", estado:"", paralizacion:"",
     potencializacion:"",
     tipo_hallazgo:"",
-    evidencia:"",
+    evidencia: null,
     clasificacion:"",
     control_asociado:"",
     fecha_cierre:"",
@@ -632,7 +637,8 @@ const columnasVisibles = columnas.filter(
 
       {open && (
         <Modal>
-          <div className="modal">
+          <form className="modal" onSubmit={handleSubmit}>
+          
             <img src={image} alt="logo" />
 
             <h3>Formulario de Reporte</h3>
@@ -715,11 +721,11 @@ const columnasVisibles = columnas.filter(
               <button className="cancel" onClick={() => setOpen(false)}>
                 Cancelar
               </button>
-              <button className="create" onClick={handleSubmit}>
+              <button type="submit" className="create">
                 Guardar
               </button>
             </div>
-          </div>
+          </form>
         </Modal>
 
       )}
@@ -1008,7 +1014,7 @@ const TableWrapper = styled.div`
   padding: 30px;
   width: 100%;
   max-width:1300px;
-  max-height: 600px;
+  max-height: 400px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 

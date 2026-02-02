@@ -9,6 +9,7 @@ export function AntecedentesObra({ data, setData }) {
 
       <div className="row">
         <select
+          required
           value={data.tipo_obra}
           onChange={(e) =>
             setData({
@@ -26,6 +27,7 @@ export function AntecedentesObra({ data, setData }) {
 
         {data.tipo_obra && (
           <input
+            required
             type="text"
             placeholder={
               data.tipo_obra === "codigo_obra"
