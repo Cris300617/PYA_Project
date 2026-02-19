@@ -12,7 +12,7 @@ export function LoginTemplate() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate(); // ✅ Para redirigir después del login
+  const navigate = useNavigate(); 
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -21,7 +21,7 @@ export function LoginTemplate() {
 
     try {
       await loginUsernamePassword(username, password);
-      navigate("/"); // ✅ Redirige al home si login ok
+      navigate("/"); 
     } catch (err) {
       setError(err.message || "Error al iniciar sesión");
     } finally {
@@ -34,7 +34,7 @@ export function LoginTemplate() {
     setLoading(true);
     try {
       await loginGoogle();
-      navigate("/"); // ✅ Redirige al home si login ok
+      navigate("/"); 
     } catch (err) {
       setError(err.message || "Error al iniciar sesión con Google");
     } finally {
@@ -79,7 +79,7 @@ export function LoginTemplate() {
           {error && <ErrorMsg>{error}</ErrorMsg>}
 
           <Btnsave
-            type="submit" // ✅ Esto asegura que dispare el submit del form
+            type="submit" 
             titulo={loading ? "Ingresando..." : "INGRESAR"}
             width="100%"
             disabled={loading}
@@ -103,7 +103,6 @@ export function LoginTemplate() {
   );
 }
 
-/* ======================= STYLES ======================= */
 
 const Container = styled.div`
   height: 100vh;
