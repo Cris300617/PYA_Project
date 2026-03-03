@@ -66,7 +66,6 @@ const Container = styled.div`
   background: #ffffff;
   font-family: 'Poppins', sans-serif;
 
-  /* ================= HEADER ================= */
   .header-home {
     position: relative;
     margin-left: -72px;
@@ -86,7 +85,6 @@ const Container = styled.div`
     }
   }
 
-  /* Tablet y mobile: sidebar oculto */
   @media (max-width: 1024px) {
     .header-home {
       margin-left: 0;
@@ -103,7 +101,6 @@ const Container = styled.div`
     }
   }
 
-  /* ================= HERO BOX ================= */
   .box-home {
     display: flex;
     justify-content: center;
@@ -129,7 +126,6 @@ const Container = styled.div`
     }
   }
 
-  /* ================= CARDS ================= */
   .content-row {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
